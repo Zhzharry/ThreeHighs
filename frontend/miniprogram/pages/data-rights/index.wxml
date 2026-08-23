@@ -1,0 +1,32 @@
+<view class="page rights-page">
+  <view class="rights-hero">
+    <text class="rights-eyebrow">个人信息权利</text>
+    <text class="rights-title">获取我的数据副本</text>
+    <text class="rights-desc">导出当前账号在本服务中保存的资料、健康记录、报告指标、提醒及AI会话内容。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head"><text class="section-title">导出范围</text><text class="section-note">仅当前用户</text></view>
+    <view class="rights-grid">
+      <view class="rights-item" wx:for="{{categories}}" wx:key="key">
+        <text class="rights-label">{{item.label}}</text><text class="rights-count">{{item.count}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="security-note">
+    <text class="security-title">安全说明</text>
+    <text>导出文件不会包含微信openid/unionid、登录Token、IP哈希、报告存储地址或AI内部追踪ID。文件可能包含敏感健康信息，请只保存到可信设备并妥善保管。</text>
+  </view>
+
+  <button class="button export-button" bindtap="exportData" loading="{{isExporting}}" disabled="{{isExporting}}">生成并分享JSON数据副本</button>
+  <text wx:if="{{lastExportAt}}" class="last-export">最近生成：{{lastExportAt}}</text>
+
+  <view class="section consent-section">
+    <view class="section-head"><text class="section-title">健康数据授权</text><text class="consent-status {{consentComplete ? 'active' : 'inactive'}}">{{consentComplete ? '已授权' : '未授权'}}</text></view>
+    <text class="consent-desc">你可以随时撤回授权。撤回不会删除既有数据，也不影响查看协议和导出个人数据副本，但会停止新的健康数据处理。</text>
+    <text wx:if="{{consentUpdatedAt}}" class="consent-time">最近变更：{{consentUpdatedAt}}</text>
+    <button wx:if="{{consentComplete}}" class="withdraw-button" bindtap="withdrawConsent" loading="{{isWithdrawing}}" disabled="{{isWithdrawing}}">撤回健康数据授权</button>
+    <button wx:else class="button reauthorize-button" bindtap="withdrawConsent" disabled>请在授权页重新授权</button>
+  </view>
+</view>

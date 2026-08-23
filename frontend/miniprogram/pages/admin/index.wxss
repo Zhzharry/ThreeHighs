@@ -1,0 +1,48 @@
+.admin-hero {
+  background: linear-gradient(135deg, #1f2937 0%, #0f766e 100%);
+}
+
+.stat-card {
+  min-height: 138rpx;
+}
+
+.admin-value {
+  display: block;
+  margin-top: 12rpx;
+  color: #111827;
+  font-size: 42rpx;
+  font-weight: 700;
+}
+
+.user-name {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.user-meta {
+  display: block;
+  margin-top: 10rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.module-card {
+  margin-bottom: 18rpx;
+}
+
+.module-title {
+  display: block;
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.module-desc {
+  display: block;
+  margin-top: 10rpx;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}

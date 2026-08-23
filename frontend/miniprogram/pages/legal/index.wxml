@@ -1,0 +1,12 @@
+<view class="page legal-page">
+  <view class="legal-head">
+    <text class="legal-title">{{title}}</text>
+    <text class="legal-version">版本：{{version}}</text>
+    <text class="legal-intro">{{intro}}</text>
+  </view>
+  <view class="legal-section" wx:for="{{sections}}" wx:key="title">
+    <text class="legal-section-title">{{item.title}}</text>
+    <text class="legal-content">{{item.content}}</text>
+  </view>
+  <view class="legal-warning">本页面为项目功能实现稿。正式发布前必须由实际运营主体和合规负责人审核，并替换所有待补充信息。</view>
+</view>

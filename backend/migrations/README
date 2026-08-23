@@ -1,0 +1,14 @@
+Flask-Migrate single-database migration directory.
+
+Create or upgrade a database:
+
+    AUTO_CREATE_TABLES=false flask --app run.py db upgrade
+
+After changing SQLAlchemy models:
+
+    AUTO_CREATE_TABLES=false flask --app run.py db migrate -m "describe change"
+    AUTO_CREATE_TABLES=false flask --app run.py db upgrade
+
+Always review generated revisions before applying them. Existing unversioned
+databases must only be stamped after their schema has been checked against the
+current migration head.

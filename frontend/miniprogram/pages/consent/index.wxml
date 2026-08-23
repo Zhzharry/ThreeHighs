@@ -1,0 +1,32 @@
+<view class="page consent-page">
+  <view class="consent-hero">
+    <text class="consent-eyebrow">首次使用确认</text>
+    <text class="consent-title">守护你的健康数据</text>
+    <text class="consent-desc">在记录血压、血糖、体检报告等敏感健康信息前，请阅读并确认以下内容。</text>
+  </view>
+
+  <view class="consent-card">
+    <text class="card-title">我们如何使用数据</text>
+    <text class="card-desc">用于保存个人健康记录、生成趋势、异常提醒以及向已授权的健康服务提供上下文。不会将健康数据用于无关广告。</text>
+    <view class="data-tags"><text>身份信息</text><text>健康指标</text><text>体检报告</text><text>使用记录</text></view>
+  </view>
+
+  <checkbox-group bindchange="changeConsent" class="consent-options">
+    <label class="consent-option">
+      <checkbox value="agreement" color="#0f766e" />
+      <view><text>我已阅读并同意</text><text class="document-link" data-type="agreement" catchtap="openDocument">《用户服务协议》</text></view>
+    </label>
+    <label class="consent-option">
+      <checkbox value="privacy" color="#0f766e" />
+      <view><text>我已阅读并同意</text><text class="document-link" data-type="privacy" catchtap="openDocument">《隐私政策》</text></view>
+    </label>
+    <label class="consent-option">
+      <checkbox value="health" color="#0f766e" />
+      <view><text>我同意为健康管理目的处理血压、血糖、血脂、体检报告、病史和用药等敏感个人信息。</text></view>
+    </label>
+  </checkbox-group>
+
+  <text class="consent-tip">不同意不会写入新的健康数据。你可以先阅读文档，再决定是否继续使用。</text>
+  <text wx:if="{{loadError}}" class="consent-error">{{loadError}}</text>
+  <button class="button consent-button" bindtap="submitConsent" loading="{{isSaving}}" disabled="{{acceptedValues.length !== 3 || isSaving}}">同意并进入小程序</button>
+</view>

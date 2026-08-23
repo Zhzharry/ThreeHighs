@@ -1,0 +1,95 @@
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">三高健康管理 · 静态演示</text>
+    <text class="hero-title">{{userName}}，今日健康评分 {{score}}</text>
+    <text class="hero-desc">当前风险等级：{{riskLevel}}。数据更新时间：{{lastSyncText}}。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">今日概览</text>
+      <text class="section-note">前后端分离展示</text>
+    </view>
+    <view class="grid">
+      <view class="grid-item" wx:for="{{metrics}}" wx:key="label">
+        <view class="card metric-card">
+          <view class="row">
+            <text class="muted">{{item.label}}</text>
+            <text class="tag {{item.tag === '正常' ? '' : 'tag-warn'}}">{{item.tag}}</text>
+          </view>
+          <view class="metric-value">
+            <text class="value">{{item.value}}</text>
+            <text class="unit">{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">功能入口</text>
+      <text class="section-note">静态页面已完成</text>
+    </view>
+    <view class="grid">
+      <view class="grid-item" wx:for="{{features}}" wx:key="title">
+        <navigator class="nav-card" url="{{item.url}}">
+          <text class="nav-title">{{item.title}}</text>
+          <text class="nav-desc">{{item.desc}}</text>
+        </navigator>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">血压血糖趋势</text>
+      <text class="section-note">ECharts 风格占位</text>
+    </view>
+    <view class="card">
+      <view class="legend-row">
+        <text class="legend bp">收缩压</text>
+        <text class="legend glu">空腹血糖</text>
+      </view>
+      <view class="chart">
+        <view class="bar-wrap" wx:for="{{trendBars}}" wx:key="day">
+          <view class="dual-bars">
+            <view class="bar" style="height: {{item.height}}rpx;"></view>
+            <view class="bar bar-alt" style="height: {{item.altHeight}}rpx;"></view>
+          </view>
+          <text class="bar-label">{{item.day}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">异常提醒</text>
+      <navigator class="section-note" url="/pages/vitals/index">查看全部</navigator>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{alerts}}" wx:key="name">
+        <view class="row">
+          <text class="alert-name">{{item.name}}</text>
+          <text class="tag tag-warn">{{item.level}}</text>
+        </view>
+        <text class="alert-value">{{item.value}}</text>
+        <text class="muted block-text">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="card task-card">
+      <view class="section-head inner-head">
+        <text class="section-title">今日待办</text>
+        <text class="section-note">3 项</text>
+      </view>
+      <view class="task-row" wx:for="{{tasks}}" wx:key="name">
+        <text class="task-name">{{item.name}}</text>
+        <text class="tag {{item.status === '待记录' ? 'tag-warn' : ''}}">{{item.status}}</text>
+      </view>
+    </view>
+  </view>
+</view>

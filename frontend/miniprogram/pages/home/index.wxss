@@ -1,0 +1,88 @@
+.metric-card {
+  min-height: 156rpx;
+}
+
+.metric-value {
+  margin-top: 18rpx;
+}
+
+.legend-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4rpx;
+}
+
+.legend {
+  margin-left: 24rpx;
+  color: #6b7280;
+  font-size: 22rpx;
+}
+
+.legend::before {
+  display: inline-block;
+  width: 16rpx;
+  height: 16rpx;
+  margin-right: 8rpx;
+  border-radius: 999rpx;
+  content: "";
+}
+
+.legend.bp::before {
+  background: #0f766e;
+}
+
+.legend.glu::before {
+  background: #f59e0b;
+}
+
+.dual-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 180rpx;
+}
+
+.dual-bars .bar {
+  width: 22rpx;
+  margin: 0 4rpx;
+}
+
+.alert-name {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.alert-value {
+  display: block;
+  margin-top: 10rpx;
+  color: #ef4444;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.block-text {
+  display: block;
+  margin-top: 8rpx;
+}
+
+.task-card {
+  padding-bottom: 14rpx;
+}
+
+.inner-head {
+  margin-bottom: 8rpx;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-top: 1rpx solid #eef2f7;
+}
+
+.task-name {
+  color: #374151;
+  font-size: 26rpx;
+}

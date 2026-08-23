@@ -1,0 +1,63 @@
+<view class="page">
+  <view class="hero report-hero">
+    <text class="eyebrow">体检报告识别</text>
+    <text class="hero-title">OCR 自动提取关键指标</text>
+    <text class="hero-desc">减少手动录入成本，识别结果进入异常预警和健康建议模块。</text>
+  </view>
+
+  <view class="section">
+    <view class="card upload-card">
+      <view class="upload-box">
+        <text class="upload-title">体检报告.pdf</text>
+        <text class="upload-desc">静态演示文件 · 3 页 · 识别完成</text>
+      </view>
+      <button class="button upload-button" bindtap="showMockToast">上传报告</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">识别流程</text>
+      <text class="section-note">AI 模块封装</text>
+    </view>
+    <view class="list">
+      <view class="list-row step-row" wx:for="{{steps}}" wx:key="title">
+        <view class="step-dot {{item.active ? 'step-active' : ''}}"></view>
+        <view class="step-content">
+          <text class="step-title">{{item.title}}</text>
+          <text class="step-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">关键指标</text>
+      <text class="section-note">OCR 抽取结果</text>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{indicators}}" wx:key="name">
+        <view class="row">
+          <text class="indicator-name">{{item.name}}</text>
+          <text class="tag {{item.result === '正常' ? '' : 'tag-warn'}}">{{item.result}}</text>
+        </view>
+        <text class="indicator-value">{{item.value}}</text>
+        <text class="muted">参考范围：{{item.range}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="card review-card">
+      <view class="row">
+        <text class="section-title">报告审核</text>
+        <text class="tag tag-warn">{{review.status}}</text>
+      </view>
+      <view class="review-meta">
+        <text>识别置信度：{{review.confidence}}</text>
+      </view>
+      <text class="review-note">{{review.note}}</text>
+    </view>
+  </view>
+</view>

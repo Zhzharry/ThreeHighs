@@ -1,0 +1,10 @@
+{
+  "name": "three-high-health-miniapp-tools",
+  "private": true,
+  "scripts": {
+    "test:miniprogram": "node tools/miniprogram-smoke.cjs"
+  },
+  "devDependencies": {
+    "miniprogram-automator": "^0.12.1"
+  }
+}

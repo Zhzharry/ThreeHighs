@@ -1,0 +1,136 @@
+<view class="page ai-page">
+  <view class="assistant-header">
+    <view class="assistant-avatar">
+      <text>AI</text>
+    </view>
+    <view class="assistant-info">
+      <text class="assistant-title">健康对话助手</text>
+      <text class="assistant-desc">结合每日记录、体检报告和知识库给出建议</text>
+    </view>
+    <text class="online-pill">在线</text>
+  </view>
+
+  <view class="context-strip">
+    <view class="context-item" wx:for="{{contextCards}}" wx:key="label">
+      <text class="context-value">{{item.value}}</text>
+      <text class="context-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <view class="section compact-section">
+    <view class="section-head">
+      <text class="section-title">快捷提问</text>
+      <text class="section-note">点击后生成对话</text>
+    </view>
+    <scroll-view class="quick-scroll" scroll-x="true" show-scrollbar="false">
+      <view
+        class="quick-chip {{item === currentQuestion ? 'active' : ''}}"
+        wx:for="{{quickQuestions}}"
+        wx:key="*this"
+        data-question="{{item}}"
+        bindtap="chooseQuestion"
+      >
+        <text>{{item}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="chat-panel">
+    <view class="chat-head">
+      <view>
+        <text class="chat-title">当前对话</text>
+        <text class="chat-subtitle">{{isBackendConnected ? '已连接 Flask AI 接口' : '本地演示数据'}}</text>
+      </view>
+      <button class="clear-button" bindtap="createNewConversation">新对话</button>
+    </view>
+
+    <view class="chat-list">
+      <view class="message-row {{item.role}}" wx:for="{{messages}}" wx:key="text">
+        <view class="bubble-avatar {{item.role}}">
+          <text>{{item.role === 'user' ? '我' : 'AI'}}</text>
+        </view>
+        <view class="message-body">
+          <view class="message-meta">
+            <text>{{item.role === 'user' ? '我' : 'AI 助手'}}</text>
+            <text>{{item.time}}</text>
+          </view>
+          <view class="message-bubble {{item.role}}">
+            <text>{{item.text}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="chat-input">
+      <view class="fake-chat-input">
+        <text>{{draftText}}</text>
+      </view>
+      <button class="send-button" bindtap="sendCurrentQuestion" disabled="{{isSending}}">{{isSending ? '发送中' : '发送'}}</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">对话记录</text>
+      <text class="section-note">最近咨询</text>
+    </view>
+    <view class="history-list">
+      <view class="history-row" wx:for="{{chatRecords}}" wx:key="title">
+        <view>
+          <text class="history-title">{{item.title}}</text>
+          <text class="history-desc">{{item.desc}}</text>
+        </view>
+        <text class="history-time">{{item.time}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">风险摘要</text>
+      <text class="section-note">来自每日记录</text>
+    </view>
+    <view class="grid">
+      <view class="grid-item" wx:for="{{riskSummary}}" wx:key="label">
+        <view class="card risk-card">
+          <text class="muted">{{item.label}}</text>
+          <text class="risk-value">{{item.value}}</text>
+          <text class="tag tag-warn">{{item.status}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">本次建议</text>
+      <text class="section-note">可生成今日计划</text>
+    </view>
+    <view class="card suggestion-card" wx:for="{{suggestions}}" wx:key="title">
+      <view class="row">
+        <text class="suggestion-title">{{item.title}}</text>
+        <text class="tag">个性化</text>
+      </view>
+      <text class="suggestion-desc">{{item.desc}}</text>
+      <view class="tag-row">
+        <text class="tag mini-tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">知识库命中</text>
+      <text class="section-note">向量检索</text>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{hits}}" wx:key="name">
+        <view class="row">
+          <text class="meal-title">{{item.name}}</text>
+          <text class="tag">相似度 {{item.score}}</text>
+        </view>
+        <text class="hit-text">{{item.source}}</text>
+      </view>
+    </view>
+  </view>
+</view>

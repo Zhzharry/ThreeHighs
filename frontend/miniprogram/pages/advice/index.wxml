@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="hero advice-hero">
+    <text class="eyebrow">大模型对话</text>
+    <text class="hero-title">个性化健康建议</text>
+    <text class="hero-desc">OpenAI 兼容接口 + Prompt 提示词工程 + Chroma 向量库，当前为静态问答演示。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">问答记录</text>
+      <text class="section-note">静态对话</text>
+    </view>
+    <view class="chat-list">
+      <view class="chat-item {{item.role}}" wx:for="{{messages}}" wx:key="text">
+        <text class="chat-role">{{item.role === 'user' ? '用户' : 'AI 助手'}}</text>
+        <text class="chat-text">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">个性化建议</text>
+    </view>
+    <view class="card plan-card" wx:for="{{plans}}" wx:key="title">
+      <text class="plan-title">{{item.title}}</text>
+      <text class="plan-desc">{{item.desc}}</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">知识库命中</text>
+      <text class="section-note">Chroma 向量检索</text>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{knowledge}}" wx:key="name">
+        <view class="row">
+          <text class="knowledge-name">{{item.name}}</text>
+          <text class="tag">相似度 {{item.score}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

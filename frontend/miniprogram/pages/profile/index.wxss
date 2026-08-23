@@ -1,0 +1,63 @@
+.profile-hero {
+  background: linear-gradient(135deg, #0f766e 0%, #2563eb 90%);
+}
+
+.info-card {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8rpx;
+}
+
+.info-cell {
+  width: 50%;
+  padding: 20rpx;
+}
+
+.info-value {
+  display: block;
+  margin-top: 8rpx;
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.record-block {
+  margin-top: 24rpx;
+}
+
+.record-text {
+  display: block;
+  margin-top: 8rpx;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}
+
+.tag-wrap {
+  margin: -8rpx;
+}
+
+.tag-spaced {
+  margin: 8rpx;
+}
+
+.goal-label {
+  color: #111827;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+
+.goal-value {
+  color: #0f766e;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.goal-progress {
+  margin-top: 18rpx;
+}
+
+.mini-nav {
+  min-height: 88rpx;
+  text-align: center;
+}

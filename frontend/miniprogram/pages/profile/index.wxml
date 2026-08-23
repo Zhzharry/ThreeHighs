@@ -1,0 +1,90 @@
+<view class="page">
+  <view class="hero profile-hero">
+    <text class="eyebrow">个人健康档案</text>
+    <text class="hero-title">{{profile.name}} · {{profile.type}}</text>
+    <text class="hero-desc">{{profile.target}}</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">基础信息</text>
+      <text class="section-note">静态档案</text>
+    </view>
+    <view class="card info-card">
+      <view class="info-cell">
+        <text class="muted">性别</text>
+        <text class="info-value">{{profile.sex}}</text>
+      </view>
+      <view class="info-cell">
+        <text class="muted">年龄</text>
+        <text class="info-value">{{profile.age}} 岁</text>
+      </view>
+      <view class="info-cell">
+        <text class="muted">身高</text>
+        <text class="info-value">{{profile.height}} cm</text>
+      </view>
+      <view class="info-cell">
+        <text class="muted">体重</text>
+        <text class="info-value">{{profile.weight}} kg</text>
+      </view>
+      <view class="info-cell">
+        <text class="muted">BMI</text>
+        <text class="info-value">{{profile.bmi}}</text>
+      </view>
+      <view class="info-cell">
+        <text class="muted">三高类型</text>
+        <text class="info-value">{{profile.type}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="card">
+      <text class="section-title">病史与用药</text>
+      <view class="record-block">
+        <text class="muted">既往病史</text>
+        <text class="record-text">{{profile.history}}</text>
+      </view>
+      <view class="record-block">
+        <text class="muted">当前用药</text>
+        <text class="record-text">{{profile.medication}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">管理标签</text>
+    </view>
+    <view class="tag-wrap">
+      <text class="tag tag-spaced" wx:for="{{tags}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">阶段目标</text>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{goals}}" wx:key="label">
+        <view class="row">
+          <text class="goal-label">{{item.label}}</text>
+          <text class="goal-value">{{item.value}}</text>
+        </view>
+        <view class="progress goal-progress">
+          <view class="progress-bar" style="width: {{item.progress}}%;"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="grid">
+      <view class="grid-item" wx:for="{{navs}}" wx:key="title">
+        <navigator class="nav-card mini-nav" url="{{item.url}}">
+          <text class="nav-title">{{item.title}}</text>
+        </navigator>
+      </view>
+    </view>
+  </view>
+</view>

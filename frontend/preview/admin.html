@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>三高健康管理后台</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230f766e'/><path d='M18 32h9l4-10 7 21 4-11h8' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body>
+    <section class="login-gate" hidden>
+      <form class="login-card">
+        <div class="login-logo">健</div>
+        <p>三高健康管理</p>
+        <h1>管理员登录</h1>
+        <label><span>管理员账号</span><input name="username" autocomplete="username" value="admin" required /></label>
+        <label><span>管理员密码</span><input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="primary" type="submit">登录管理后台</button>
+        <small>本地演示账号：admin / admin123<br />部署时请通过环境变量修改。</small>
+      </form>
+    </section>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand"><span>健</span><div><strong>三高健康管理</strong><small>运营管理后台</small></div></div>
+        <nav>
+          <button class="active" data-view="dashboard"><i>概</i>数据概览</button>
+          <button data-view="users"><i>用</i>用户管理</button>
+          <button data-view="reports"><i>报</i>报告审核</button>
+          <button data-view="foods"><i>食</i>食物营养库</button>
+          <button data-view="announcements"><i>公</i>系统公告</button>
+        </nav>
+        <div class="sidebar-foot"><span class="connection-dot"></span><span class="connection-text">正在连接后端</span><a href="./index.html">返回小程序预览</a></div>
+      </aside>
+
+      <main class="workspace">
+        <header class="admin-topbar">
+          <div><p>管理控制台</p><h1 class="view-title">数据概览</h1></div>
+          <div class="admin-user"><span>管</span><div><strong>系统管理员</strong><small>本地开发环境</small></div><button class="logout-button" type="button">退出</button></div>
+        </header>
+
+        <section class="view active" id="dashboard-view">
+          <div class="stat-grid">
+            <article><span>用户总数</span><strong data-stat="users">-</strong><small>已建立健康档案</small></article>
+            <article><span>中高风险提醒</span><strong data-stat="mediumHighRisk">-</strong><small>需要持续关注</small></article>
+            <article><span>待审核报告</span><strong data-stat="pendingReports">-</strong><small>OCR 人工复核</small></article>
+            <article><span>系统公告</span><strong data-stat="announcements">-</strong><small>草稿与已发布</small></article>
+          </div>
+          <section class="panel">
+            <header><div><h2>重点关注用户</h2><p>根据当前风险状态汇总</p></div><button class="text-action" data-go="users">查看全部</button></header>
+            <div class="dashboard-users"></div>
+          </section>
+        </section>
+
+        <section class="view" id="users-view">
+          <section class="panel">
+            <header><div><h2>用户管理</h2><p>查看用户档案、慢病类型和活跃信息</p></div><div class="toolbar"><input id="user-keyword" placeholder="搜索用户昵称" /><button data-action="search-users">搜索</button></div></header>
+          <div class="table-wrap"><table><thead><tr><th>用户</th><th>年龄</th><th>手机号</th><th>慢病类型</th><th>账号状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody id="users-body"></tbody></table></div>
+            <div class="pagination" id="users-pagination"></div>
+          </section>
+        </section>
+
+        <section class="view" id="reports-view">
+          <section class="panel">
+            <header><div><h2>体检报告审核</h2><p>复核 OCR 结果和低置信度报告</p></div><div class="toolbar"><select id="report-status"><option value="">全部状态</option><option value="review_pending">待复核</option><option value="completed">已完成</option><option value="rejected">已驳回</option></select><button data-action="filter-reports">筛选</button></div></header>
+            <div class="batch-toolbar" id="reports-batch"><span>本页已选 <strong>0</strong> 条</span><button data-action="batch-review" data-status="completed" disabled>批量通过</button><button class="danger" data-action="batch-review" data-status="rejected" disabled>批量驳回</button></div>
+            <div class="table-wrap"><table><thead><tr><th><input type="checkbox" data-select-all="reports" aria-label="全选本页报告" /></th><th>报告</th><th>用户</th><th>状态</th><th>置信度</th><th>摘要</th><th>操作</th></tr></thead><tbody id="reports-body"></tbody></table></div>
+            <div class="pagination" id="reports-pagination"></div>
+          </section>
+        </section>
+
+        <section class="view" id="foods-view">
+          <section class="panel">
+            <header><div><h2>食物营养库</h2><p>维护热量、糖、脂肪和盐分基础数据</p></div><div class="toolbar"><input id="food-keyword" placeholder="搜索食物" /><button data-action="search-foods">搜索</button><button class="primary" data-action="new-food">新增食物</button></div></header>
+            <div class="batch-toolbar" id="foods-batch"><span>本页已选 <strong>0</strong> 条</span><button class="danger" data-action="batch-delete-foods" disabled>批量删除</button></div>
+            <div class="table-wrap"><table><thead><tr><th><input type="checkbox" data-select-all="foods" aria-label="全选本页食物" /></th><th>食物</th><th>分类/单位</th><th>热量</th><th>糖</th><th>脂肪</th><th>盐</th><th>操作</th></tr></thead><tbody id="foods-body"></tbody></table></div>
+            <div class="pagination" id="foods-pagination"></div>
+          </section>
+        </section>
+
+        <section class="view" id="announcements-view">
+          <section class="panel">
+            <header><div><h2>系统公告</h2><p>维护饮食提醒、复查通知和系统公告</p></div><button class="primary" data-action="new-announcement">新增公告</button></header>
+            <div class="batch-toolbar" id="announcements-batch"><span>本页已选 <strong>0</strong> 条</span><button data-action="batch-publish" data-published="true" disabled>批量发布</button><button data-action="batch-publish" data-published="false" disabled>设为草稿</button></div>
+            <div class="announcement-list"></div>
+            <div class="pagination" id="announcements-pagination"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" hidden>
+      <form class="modal-card">
+        <header><div><h2 class="modal-title">编辑</h2><p class="modal-subtitle"></p></div><button type="button" class="modal-close" aria-label="关闭">×</button></header>
+        <div class="modal-fields"></div>
+        <footer><button type="button" class="modal-cancel">取消</button><button type="submit" class="primary modal-submit">保存</button></footer>
+      </form>
+    </div>
+    <div class="toast" hidden></div>
+    <script src="./admin.js"></script>
+  </body>
+</html>

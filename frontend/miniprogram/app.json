@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/daily/index",
+    "pages/ai/index",
+    "pages/mine/index",
+    "pages/consent/index",
+    "pages/legal/index",
+    "pages/data-rights/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#0f766e",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "三高健康管理",
+    "backgroundColor": "#f4f8f7",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#64748b",
+    "selectedColor": "#0f766e",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/daily/index",
+        "text": "每日记录"
+      },
+      {
+        "pagePath": "pages/ai/index",
+        "text": "AI"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

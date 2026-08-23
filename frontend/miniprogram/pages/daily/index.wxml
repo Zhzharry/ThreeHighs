@@ -1,0 +1,410 @@
+<view class="page daily-page">
+  <view class="daily-header">
+    <view>
+      <text class="eyebrow-dark">今日健康记录</text>
+      <text class="daily-title">{{selectedDate}}</text>
+      <text class="daily-subtitle">完成度 {{completionRate}}% · {{isBackendConnected ? '已连接后端 API' : '本地演示数据'}}</text>
+    </view>
+    <view class="score-pill">
+      <text class="score-number">{{healthScore}}</text>
+      <text class="score-label">评分</text>
+    </view>
+  </view>
+
+  <view class="calendar-card">
+    <view class="calendar-head">
+      <text class="section-title">记录日历</text>
+      <text class="section-note calendar-open" bindtap="openCalendarModal">点击日期查看</text>
+    </view>
+    <view class="calendar-summary" bindtap="openCalendarModal">
+      <view>
+        <text class="calendar-summary-title">{{calendarTitle}}</text>
+        <text class="calendar-summary-lunar">{{calendarLunar}}</text>
+      </view>
+      <view class="calendar-summary-action">
+        <text>展开</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="calendar-modal-mask" wx:if="{{showCalendarModal}}" bindtap="closeCalendarModal">
+    <view class="calendar-modal" catchtap="noop">
+      <view class="big-calendar-top">
+        <view>
+          <text class="big-date-title">{{calendarTitle}}</text>
+          <text class="big-date-lunar">{{calendarLunar}}</text>
+        </view>
+        <button class="calendar-close" bindtap="closeCalendarModal">收起</button>
+      </view>
+      <view class="big-month-head">
+        <text>{{monthLabel}}</text>
+        <view class="month-arrow-group">
+          <text class="month-arrow">▲</text>
+          <text class="month-arrow">▼</text>
+        </view>
+      </view>
+      <view class="weekday-row">
+        <text wx:for="{{monthWeekdays}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="month-grid">
+        <view
+          class="month-day {{item.outside ? 'outside' : ''}} {{item.muted ? 'muted-day' : ''}} {{item.date === selectedDate ? 'active' : ''}} {{item.isToday ? 'today' : ''}}"
+          wx:for="{{monthCalendar}}"
+          wx:key="date"
+          data-date="{{item.date}}"
+          bindtap="selectMonthDate"
+        >
+          <text class="month-day-number">{{item.day}}</text>
+          <text class="month-day-lunar">{{item.lunar}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="month-strip">
+    <view class="month-item" wx:for="{{monthSummary}}" wx:key="label">
+      <text class="month-value">{{item.value}}</text>
+      <text class="month-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <view class="panel-tabs">
+    <view
+      class="panel-tab {{item.key === activePanel ? 'active' : ''}}"
+      wx:for="{{panels}}"
+      wx:key="key"
+      data-panel="{{item.key}}"
+      bindtap="switchPanel"
+    >
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+
+  <block wx:if="{{activePanel === 'overview'}}">
+    <view class="section" wx:if="{{!currentRecordId}}">
+      <view class="card empty-record-card">
+        <text class="empty-record-title">这一天还没有健康记录</text>
+        <text class="empty-record-desc">创建后可以补录血压、血糖、体重、饮食、心情与待办。</text>
+        <button class="button save-button" loading="{{isCreatingRecord}}" disabled="{{!canCreateRecord || isCreatingRecord}}" bindtap="createSelectedRecord">{{canCreateRecord ? '开始补录' : '未来日期暂不可补录'}}</button>
+      </view>
+    </view>
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">核心指标</text>
+        <text class="section-note">当天录入</text>
+      </view>
+      <view class="grid">
+        <view class="grid-item" wx:for="{{records.vitals}}" wx:key="label">
+          <view class="card metric-card">
+            <text class="muted">{{item.label}}</text>
+            <text class="value metric-value">{{item.value}}<text class="unit">{{item.unit}}</text></text>
+            <text class="tag {{item.warn ? 'tag-warn' : ''}}">{{item.status}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">快速补录</text>
+        <text class="section-note">保存后同步后端</text>
+      </view>
+      <view class="card form-card">
+        <view class="vital-input-grid">
+          <view class="vital-input-row"><text>收缩压</text><input type="number" value="{{vitalForm.systolic_pressure}}" data-field="systolic_pressure" bindinput="editVital"/><text>mmHg</text></view>
+          <view class="vital-input-row"><text>舒张压</text><input type="number" value="{{vitalForm.diastolic_pressure}}" data-field="diastolic_pressure" bindinput="editVital"/><text>mmHg</text></view>
+          <view class="vital-input-row"><text>空腹血糖</text><input type="digit" value="{{vitalForm.fasting_glucose}}" data-field="fasting_glucose" bindinput="editVital"/><text>mmol/L</text></view>
+          <view class="vital-input-row"><text>餐后血糖</text><input type="digit" value="{{vitalForm.postprandial_glucose}}" data-field="postprandial_glucose" bindinput="editVital"/><text>mmol/L</text></view>
+          <view class="vital-input-row"><text>今日体重</text><input type="digit" value="{{vitalForm.weight_kg}}" data-field="weight_kg" bindinput="editVital"/><text>kg</text></view>
+        </view>
+        <button class="button save-button" loading="{{isSavingVitals}}" disabled="{{isSavingVitals || !currentRecordId}}" bindtap="saveVitals">保存今日记录</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">今日状态</text>
+        <text class="section-note">心情与备注</text>
+      </view>
+      <view class="card daily-note-card">
+        <picker mode="selector" range="{{moodOptions}}" bindchange="chooseMood">
+          <view class="mood-picker"><text>当前状态</text><text>{{noteForm.mood}} ›</text></view>
+        </picker>
+        <textarea class="daily-note-input" maxlength="500" value="{{noteForm.note}}" bindinput="editDailyNote" placeholder="记录今天的身体感受、用药情况或需要关注的事项" />
+        <view class="note-footer"><text>{{noteForm.note.length}}/500</text><button class="button note-save-button" loading="{{isSavingNote}}" disabled="{{isSavingNote || !currentRecordId}}" bindtap="saveDailyNote">保存状态</button></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">今日待办</text>
+        <text class="section-note">可编辑事项</text>
+      </view>
+      <view class="card todo-form">
+        <view class="todo-form-row" wx:for="{{records.tasks}}" wx:key="id">
+          <input
+            class="todo-input"
+            value="{{item.name}}"
+            data-index="{{index}}"
+            bindinput="editTaskName"
+            placeholder="输入今日待办"
+          />
+          <view class="todo-status" data-index="{{index}}" bindtap="toggleTaskDone">
+            <text class="tag {{item.done ? '' : 'tag-warn'}}">{{item.done ? '已完成' : '待记录'}}</text>
+          </view>
+          <button class="todo-delete" data-index="{{index}}" bindtap="deleteTaskItem">删</button>
+        </view>
+        <button class="button button-secondary add-button" bindtap="addTaskItem">添加待办</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">健康小结</text>
+        <text class="section-note">根据今日数据生成</text>
+      </view>
+      <view class="card summary-card" wx:for="{{records.summaryCards}}" wx:key="title">
+        <text class="summary-title">{{item.title}}</text>
+        <text class="summary-desc">{{item.desc}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">异常提醒</text>
+      </view>
+      <view class="card alert-card">
+        <view class="alert-row {{item.isRead ? 'alert-read' : ''}}" wx:for="{{records.alerts}}" wx:key="id" data-index="{{index}}" bindtap="markAlertRead">
+          <view class="alert-heading"><text class="alert-title">{{item.title}}</text><text class="tag {{item.riskLevel === 'high' ? 'tag-danger' : item.riskLevel === 'medium' ? 'tag-warn' : ''}}">{{item.isRead ? '已读' : item.riskLevel === 'high' ? '高风险' : item.riskLevel === 'medium' ? '需关注' : '提醒'}}</text></view>
+          <text class="alert-text">{{item.content}}</text>
+          <text class="alert-action" wx:if="{{!item.isRead && item.id && isBackendConnected}}">点击标记已读</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:if="{{activePanel === 'diet'}}">
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">营养统计</text>
+        <text class="section-note">控糖/控压/控脂</text>
+      </view>
+      <view class="card nutrition-card">
+        <view class="nutrition-row" wx:for="{{records.nutrition}}" wx:key="label">
+          <view class="row">
+            <text class="nutrition-label">{{item.label}}</text>
+            <text class="nutrition-value">{{item.value}}</text>
+          </view>
+          <view class="progress nutrition-progress">
+            <view class="progress-bar {{item.warn ? 'progress-warn' : ''}}" style="{{item.progressStyle}}"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">三餐记录</text>
+        <text class="section-note">食物与营养</text>
+      </view>
+      <view class="list">
+        <view class="list-row" wx:for="{{records.meals}}" wx:key="id">
+          <view class="row">
+            <text class="meal-name">{{item.name}}</text>
+            <text class="tag {{item.tag === '无记录' ? 'tag-danger' : item.tag === '待确认' ? 'tag-warn' : ''}}">{{item.tag}}</text>
+          </view>
+          <text class="meal-text">{{item.text}}</text>
+          <view class="meal-meta">
+            <text>{{item.calories}}</text>
+            <text>糖 {{item.sugar}}</text>
+            <text>盐 {{item.salt}}</text>
+          </view>
+          <view class="meal-actions"><button class="meal-edit" data-id="{{item.id}}" bindtap="editMeal">编辑</button><button class="meal-delete" data-id="{{item.id}}" bindtap="deleteMeal">删除</button></view>
+        </view>
+      </view>
+      <button class="button button-secondary add-button" bindtap="toggleMealForm">{{showMealForm ? '收起表单' : '补充一餐'}}</button>
+      <view class="card meal-form" wx:if="{{showMealForm}}">
+        <picker mode="selector" range="{{mealTypeNames}}" bindchange="chooseMealType"><view class="meal-picker">餐次：{{mealForm.meal_name}}</view></picker>
+        <input placeholder="食物名称（必填）" value="{{mealForm.food_name}}" data-field="food_name" bindinput="editMealField"/>
+        <input placeholder="分量，例如 1 碗" value="{{mealForm.amount}}" data-field="amount" bindinput="editMealField"/>
+        <view class="meal-nutrients">
+          <input type="digit" placeholder="热量 kcal" value="{{mealForm.calories}}" data-field="calories" bindinput="editMealField"/>
+          <input type="digit" placeholder="糖 g" value="{{mealForm.sugar}}" data-field="sugar" bindinput="editMealField"/>
+          <input type="digit" placeholder="脂肪 g" value="{{mealForm.fat}}" data-field="fat" bindinput="editMealField"/>
+          <input type="digit" placeholder="盐 g" value="{{mealForm.salt}}" data-field="salt" bindinput="editMealField"/>
+        </view>
+        <button class="button save-button" bindtap="saveMeal">{{mealForm.editingId ? '保存修改' : '保存饮食记录'}}</button>
+        <button class="button button-secondary cancel-meal-button" wx:if="{{mealForm.editingId}}" bindtap="cancelMealEdit">取消编辑</button>
+      </view>
+    </view>
+  </block>
+
+  <block wx:if="{{activePanel === 'trend'}}">
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">健康趋势</text>
+        <view class="trend-range-tabs"><text class="trend-range {{trendRange === '7d' ? 'active' : ''}}" data-range="7d" bindtap="switchTrendRange">7天</text><text class="trend-range {{trendRange === '30d' ? 'active' : ''}}" data-range="30d" bindtap="switchTrendRange">30天</text></view>
+      </view>
+      <view class="card echarts-card">
+        <ec-canvas id="vitals-trend-chart" canvas-id="vitals-trend-chart" ec="{{ec}}"></ec-canvas>
+        <view class="trend-chart-state" wx:if="{{trendLoading}}">
+          <view class="trend-loading-dot"></view>
+          <text>正在加载趋势数据</text>
+        </view>
+        <view class="trend-chart-state trend-chart-error" wx:elif="{{trendError}}">
+          <text>{{trendError}}</text>
+          <button class="trend-retry-button" bindtap="retryTrendData">重新加载</button>
+        </view>
+        <view class="trend-chart-state" wx:elif="{{!trendPoints.length}}">
+          <text>当前范围暂无健康指标记录</text>
+          <text class="trend-state-hint">完成血压、血糖记录后会自动生成趋势</text>
+        </view>
+      </view>
+      <view class="card trend-fallback" wx:if="{{!chartReady && !trendLoading && !trendError && trendPoints.length}}">
+        <view class="legend-row">
+          <text class="legend bp">收缩压</text>
+          <text class="legend sugar">空腹血糖</text>
+        </view>
+        <view class="chart">
+          <view class="bar-wrap" wx:for="{{records.trendBars}}" wx:key="day">
+            <view class="dual-bars">
+              <view class="bar" style="height: {{item.bp}}rpx;"></view>
+              <view class="bar bar-alt" style="height: {{item.sugar}}rpx;"></view>
+            </view>
+            <text class="bar-label">{{item.day}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="card predict-card">
+        <text class="section-title">预测结论</text>
+        <text class="predict-text">未来 3 天血压预计小幅下降，空腹血糖仍需重点关注。建议晚餐减少精制主食，并保持餐后散步。</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">未来 3 天预测</text>
+        <text class="section-note">模型输出 demo</text>
+      </view>
+      <view class="list">
+        <view class="list-row" wx:for="{{records.predictionList}}" wx:key="date">
+          <view class="row">
+            <text class="meal-name">{{item.date}}</text>
+            <text class="tag {{item.level === '中风险' ? 'tag-warn' : ''}}">{{item.level}}</text>
+          </view>
+          <text class="meal-text">血压 {{item.bp}} mmHg · 空腹血糖 {{item.glucose}} mmol/L</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:if="{{activePanel === 'report'}}">
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">上传体检报告</text>
+        <text class="section-note">图片 / 拍照</text>
+      </view>
+      <view class="upload-dropzone" bindtap="toggleUploadOptions">
+        <view class="camera-visual">
+          <view class="camera-top"></view>
+          <view class="camera-lens"></view>
+        </view>
+        <text class="dropzone-title">上传体检报告图片</text>
+        <text class="dropzone-desc">点击后选择图片或进行拍照</text>
+      </view>
+      <view class="upload-option-panel" wx:if="{{records.uploadOptionsVisible}}">
+        <button class="button upload-option-button" bindtap="chooseAlbumReport">选择图片</button>
+        <button class="button button-secondary upload-option-button" bindtap="takePhotoReport">进行拍照</button>
+        <button class="button button-secondary upload-option-button" bindtap="choosePdfReport">选择 PDF</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">待识别文件</text>
+        <text class="section-note">{{records.selectedReport.source}}</text>
+      </view>
+      <view class="card selected-file-card">
+        <view class="file-main">
+          <view class="file-icon">
+            <text>图</text>
+          </view>
+          <view class="file-info">
+            <text class="upload-title">{{records.selectedReport.name}}</text>
+            <text class="upload-desc">{{records.selectedReport.type}} · {{records.selectedReport.size}} · {{records.selectedReport.status}}</text>
+            <text class="file-preview">{{records.selectedReport.preview}}</text>
+          </view>
+        </view>
+        <view class="file-footer">
+          <text class="tag {{records.selectedReport.status === '待识别' || records.selectedReport.status === '识别中' || records.selectedReport.status === '未上传' ? 'tag-warn' : ''}}">置信度 {{records.selectedReport.confidence}}</text>
+          <button class="button recognize-button" bindtap="startOcrDemo" disabled="{{records.isRecognizing}}">{{records.isRecognizing ? '识别中' : '开始识别'}}</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">识别进度</text>
+        <text class="section-note">{{records.selectedReport.status}}</text>
+      </view>
+      <view class="card progress-card">
+        <view class="progress-head">
+          <text class="progress-title">OCR 识别加载</text>
+          <text class="progress-percent">{{records.ocrProgress}}%</text>
+        </view>
+        <view class="progress ocr-progress">
+          <view class="progress-bar" style="{{records.ocrProgressStyle}}"></view>
+        </view>
+        <text class="progress-desc">{{records.selectedReport.preview}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">识别指标</text>
+        <text class="section-note">{{reportEditMode ? '人工纠错中' : '可人工核对'}}</text>
+      </view>
+      <view class="list">
+        <view class="list-row" wx:for="{{records.reports}}" wx:key="name">
+          <block wx:if="{{!reportEditMode}}">
+            <view class="row"><text class="meal-name">{{item.name}}</text><text class="tag {{item.result === '正常' ? '' : 'tag-warn'}}">{{item.result}}</text></view>
+            <text class="report-value">{{item.value}} {{item.unit}}</text>
+            <text class="muted">参考范围：{{item.range}}</text>
+          </block>
+          <view class="indicator-edit-form" wx:else>
+            <input value="{{item.name}}" data-index="{{index}}" data-field="name" bindinput="editReportIndicator" placeholder="指标名称" />
+            <view class="indicator-value-row"><input value="{{item.value}}" data-index="{{index}}" data-field="value" bindinput="editReportIndicator" placeholder="数值" /><input value="{{item.unit}}" data-index="{{index}}" data-field="unit" bindinput="editReportIndicator" placeholder="单位" /></view>
+            <input value="{{item.range}}" data-index="{{index}}" data-field="range" bindinput="editReportIndicator" placeholder="参考范围" />
+            <picker mode="selector" range="{{reportStatusOptions}}" data-index="{{index}}" bindchange="changeReportStatus"><view class="indicator-status-picker">结果状态：{{item.result}} ›</view></picker>
+          </view>
+        </view>
+      </view>
+      <view class="report-action-grid" wx:if="{{records.selectedReport.reportId}}">
+        <button class="button button-secondary" bindtap="toggleReportEdit">{{reportEditMode ? '取消纠错' : '人工纠错'}}</button>
+        <button class="button" wx:if="{{reportEditMode}}" loading="{{isSavingReport}}" bindtap="saveReportCorrections">保存纠错</button>
+        <button class="button" wx:else bindtap="confirmCurrentReport">确认报告</button>
+        <button class="button button-secondary" bindtap="rerecognizeCurrentReport">重新识别</button>
+        <button class="button report-delete-button" bindtap="deleteCurrentReport">删除报告</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">上传历史</text>
+      </view>
+      <view class="list">
+        <view class="list-row report-history-row" wx:for="{{records.uploadHistory}}" wx:key="id" data-id="{{item.id}}" bindtap="openReportDetail">
+          <view class="row">
+            <text class="meal-name">{{item.name}}</text>
+            <text class="tag {{item.status === '待复核' ? 'tag-warn' : ''}}">{{item.status}}</text>
+          </view>
+          <text class="meal-text">{{item.type}} · {{item.time}}</text>
+          <text class="history-action">查看详情 ›</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

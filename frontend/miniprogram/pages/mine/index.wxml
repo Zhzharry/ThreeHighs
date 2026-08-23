@@ -1,0 +1,101 @@
+<view class="page mine-page">
+  <view class="mine-hero">
+    <button class="avatar avatar-button" open-type="chooseAvatar" bindchooseavatar="chooseAvatar" loading="{{isUploadingAvatar}}">
+      <image wx:if="{{user.avatarUrl}}" src="{{user.avatarUrl}}" mode="aspectFill" />
+      <text wx:else>{{user.avatar}}</text>
+    </button>
+    <view class="mine-info">
+      <text class="mine-name">{{user.name}}</text>
+      <text class="mine-meta">年龄：{{user.age}} 岁</text>
+      <text class="mine-meta">电话：{{user.phone}}</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">个人资料</text>
+      <text class="section-note">头像、昵称与联系方式</text>
+    </view>
+    <view class="account-form">
+      <label class="account-field">
+        <text>昵称</text>
+        <input value="{{profileForm.nickname}}" maxlength="30" data-field="nickname" bindinput="editUserField" placeholder="请输入昵称" />
+      </label>
+      <label class="account-field">
+        <text>手机号</text>
+        <input type="number" value="{{profileForm.phone}}" maxlength="11" data-field="phone" bindinput="editUserField" placeholder="请输入手机号" />
+      </label>
+    </view>
+    <view class="account-actions">
+      <button class="button secondary-button" open-type="chooseAvatar" bindchooseavatar="chooseAvatar" loading="{{isUploadingAvatar}}">选择微信头像</button>
+      <button class="button ghost-danger" bindtap="removeAvatar" disabled="{{!user.avatarUrl || isUploadingAvatar}}">移除头像</button>
+    </view>
+    <button class="button save-button" bindtap="saveUserProfile" loading="{{isSavingProfile}}" disabled="{{isSavingProfile}}">保存个人资料</button>
+    <text class="permission-note">正式获取微信头像、昵称或手机号仍需原项目管理员配置对应权限；当前可使用微信头像选择器并手工维护资料。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">健康档案摘要</text>
+      <text class="section-note">{{isBackendConnected ? '已连接后端 API' : '可编辑'}}</text>
+    </view>
+    <view class="profile-grid editable-profile">
+      <view class="profile-cell {{index > 3 ? 'wide' : ''}}" wx:for="{{profileItems}}" wx:key="label">
+        <text class="profile-label">{{item.label}}</text>
+        <input
+          class="profile-input"
+          value="{{item.value}}"
+          data-index="{{index}}"
+          bindinput="editProfileItem"
+          disabled="{{item.readonly}}"
+          placeholder="请输入{{item.label}}"
+        />
+      </view>
+    </view>
+    <button class="button save-button" bindtap="saveHealthProfile">保存健康档案</button>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">提醒与设置</text>
+    </view>
+    <view class="list settings-form">
+      <view class="list-row menu-row">
+        <view><text class="menu-title">异常预警推送</text><text class="menu-desc">指标异常时接收提醒</text></view>
+        <switch color="#0f766e" checked="{{settingValues.alert_push_enabled}}" bindchange="toggleAlertPush" />
+      </view>
+      <view class="list-row menu-row">
+        <view><text class="menu-title">每日记录提醒</text><text class="menu-desc">按设定时间提醒健康打卡</text></view>
+        <switch color="#0f766e" checked="{{settingValues.daily_record_reminder_enabled}}" bindchange="toggleDailyReminder" />
+      </view>
+      <view class="list-row menu-row {{settingValues.daily_record_reminder_enabled ? '' : 'disabled-row'}}">
+        <text class="menu-title">提醒时间</text>
+        <picker mode="time" value="{{settingValues.daily_record_reminder_time}}" disabled="{{!settingValues.daily_record_reminder_enabled}}" bindchange="changeReminderTime">
+          <view class="time-picker">{{settingValues.daily_record_reminder_time}}</view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">隐私与账号安全</text>
+      <text class="section-note">{{consentStatus.required_complete ? '授权已记录' : '待确认'}}</text>
+    </view>
+    <view class="list privacy-list">
+      <view class="list-row menu-row" data-type="privacy" bindtap="openLegalDocument">
+        <view><text class="menu-title">隐私政策</text><text class="menu-desc">了解个人信息和健康数据如何处理</text></view><text class="menu-arrow">›</text>
+      </view>
+      <view class="list-row menu-row" data-type="agreement" bindtap="openLegalDocument">
+        <view><text class="menu-title">用户服务协议</text><text class="menu-desc">服务范围、用户责任与医疗免责声明</text></view><text class="menu-arrow">›</text>
+      </view>
+      <view class="list-row menu-row" bindtap="openConsentCenter">
+        <view><text class="menu-title">健康数据授权</text><text class="menu-desc">{{consentStatus.required_complete ? '当前版本已确认' : '需要完成授权确认'}}</text></view><text class="consent-state {{consentStatus.required_complete ? 'accepted' : ''}}">{{consentStatus.required_complete ? '已同意' : '待确认'}}</text>
+      </view>
+      <view class="list-row menu-row" bindtap="openDataRights">
+        <view><text class="menu-title">我的数据副本</text><text class="menu-desc">查看数据范围并导出JSON文件</text></view><text class="menu-arrow">›</text>
+      </view>
+    </view>
+    <text class="permission-note">协议内容当前为项目实现稿；正式发布前必须补充真实运营主体、联系方式、数据保留和注销规则。</text>
+  </view>
+</view>

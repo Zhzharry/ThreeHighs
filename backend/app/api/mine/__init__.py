@@ -1,0 +1,2 @@
+"""Mine page API module."""
+

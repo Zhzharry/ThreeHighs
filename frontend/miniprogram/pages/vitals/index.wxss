@@ -1,0 +1,62 @@
+.vitals-hero {
+  background: linear-gradient(135deg, #2563eb 0%, #0f766e 92%);
+}
+
+.vital-card {
+  min-height: 168rpx;
+}
+
+.vital-value {
+  margin: 14rpx 0 16rpx;
+}
+
+.dual-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 180rpx;
+}
+
+.dual-bars .bar {
+  width: 22rpx;
+  margin: 0 4rpx;
+}
+
+.chart-note {
+  margin-top: 14rpx;
+  color: #6b7280;
+  font-size: 23rpx;
+  line-height: 34rpx;
+}
+
+.prediction-date {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.prediction-value {
+  display: block;
+  margin-top: 10rpx;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}
+
+.alert-card {
+  margin-bottom: 18rpx;
+}
+
+.alert-title {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.alert-desc {
+  display: block;
+  margin-top: 14rpx;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}

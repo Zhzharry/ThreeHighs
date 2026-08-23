@@ -1,0 +1,6 @@
+frontend/miniprogram
+frontend/preview/node_modules
+backend/.venv
+backend/__pycache__
+backend/.pytest_cache
+.git

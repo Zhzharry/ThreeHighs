@@ -1,0 +1,44 @@
+<view class="page">
+  <view class="hero admin-hero">
+    <text class="eyebrow">后台管理展示</text>
+    <text class="hero-title">管理员工作台</text>
+    <text class="hero-desc">用于课程展示用户管理、健康数据维护、饮食数据维护、报告审核和公告管理。</text>
+  </view>
+
+  <view class="section">
+    <view class="grid">
+      <view class="grid-item" wx:for="{{stats}}" wx:key="label">
+        <view class="card stat-card">
+          <text class="muted">{{item.label}}</text>
+          <text class="admin-value">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">用户管理</text>
+      <text class="section-note">静态列表</text>
+    </view>
+    <view class="list">
+      <view class="list-row" wx:for="{{users}}" wx:key="name">
+        <view class="row">
+          <text class="user-name">{{item.name}}</text>
+          <text class="tag {{item.risk === '高风险' ? 'tag-danger' : item.risk === '中风险' ? 'tag-warn' : ''}}">{{item.risk}}</text>
+        </view>
+        <text class="user-meta">{{item.type}} · {{item.active}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">管理模块</text>
+    </view>
+    <view class="card module-card" wx:for="{{modules}}" wx:key="title">
+      <text class="module-title">{{item.title}}</text>
+      <text class="module-desc">{{item.desc}}</text>
+    </view>
+  </view>
+</view>

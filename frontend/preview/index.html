@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>三高健康管理小程序预览</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230f766e'/><path d='M18 32h9l4-10 7 21 4-11h8' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <section class="phone">
+        <header class="topbar">
+          <strong>三高健康管理</strong>
+          <span>正在连接后端 API</span>
+          <a class="admin-entry" href="./admin.html">管理后台</a>
+        </header>
+
+        <section class="screen">
+          <article class="page active" id="daily">
+            <section class="daily-hero">
+              <div>
+                <span>今日健康记录</span>
+                <h1>2026-08-17</h1>
+              </div>
+              <div class="score">
+                <strong>82</strong>
+                <small>评分</small>
+              </div>
+            </section>
+
+            <section class="block">
+              <header>
+                <h2>记录日历</h2>
+                <button class="calendar-trigger" type="button">点击日期查看</button>
+              </header>
+              <div class="calendar-summary-preview">
+                <div>
+                  <strong>8月17日, 星期一</strong>
+                  <span>七月初五</span>
+                </div>
+                <button class="calendar-trigger ghost" type="button">展开</button>
+              </div>
+            </section>
+
+            <section class="big-calendar-preview" aria-label="大日历">
+              <div class="big-calendar-panel">
+                <header>
+                  <div>
+                    <strong>8月17日, 星期一</strong>
+                    <span>七月初五</span>
+                  </div>
+                  <button class="calendar-trigger close" type="button">收起</button>
+                </header>
+                <div class="month-line">
+                  <strong>2026年8月</strong>
+                  <span>▲</span>
+                  <span>▼</span>
+                </div>
+                <div class="week-line">
+                  <b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><b>日</b>
+                </div>
+                <div class="month-preview-grid">
+                  <button class="outside"><strong>27</strong><span>十四</span></button>
+                  <button class="outside"><strong>28</strong><span>十五</span></button>
+                  <button class="outside"><strong>29</strong><span>十六</span></button>
+                  <button class="outside"><strong>30</strong><span>十七</span></button>
+                  <button class="outside"><strong>31</strong><span>十八</span></button>
+                  <button><strong>1</strong><span>十九</span></button>
+                  <button><strong>2</strong><span>二十</span></button>
+                  <button><strong>3</strong><span>廿一</span></button>
+                  <button><strong>4</strong><span>廿二</span></button>
+                  <button><strong>5</strong><span>廿三</span></button>
+                  <button><strong>6</strong><span>廿四</span></button>
+                  <button><strong>7</strong><span>立秋</span></button>
+                  <button><strong>8</strong><span>廿六</span></button>
+                  <button><strong>9</strong><span>廿七</span></button>
+                  <button><strong>10</strong><span>廿八</span></button>
+                  <button><strong>11</strong><span>廿九</span></button>
+                  <button><strong>12</strong><span>三十</span></button>
+                  <button><strong>13</strong><span>七月</span></button>
+                  <button><strong>14</strong><span>初二</span></button>
+                  <button><strong>15</strong><span>初三</span></button>
+                  <button><strong>16</strong><span>初四</span></button>
+                  <button class="active"><strong>17</strong><span>初五</span></button>
+                  <button><strong>18</strong><span>初六</span></button>
+                  <button><strong>19</strong><span>初七</span></button>
+                  <button class="soft"><strong>20</strong><span>初八</span></button>
+                  <button><strong>21</strong><span>初九</span></button>
+                  <button><strong>22</strong><span>初十</span></button>
+                  <button><strong>23</strong><span>处暑</span></button>
+                  <button><strong>24</strong><span>十二</span></button>
+                  <button><strong>25</strong><span>十三</span></button>
+                  <button><strong>26</strong><span>十四</span></button>
+                  <button><strong>27</strong><span>十五</span></button>
+                  <button><strong>28</strong><span>十六</span></button>
+                  <button><strong>29</strong><span>十七</span></button>
+                  <button><strong>30</strong><span>十八</span></button>
+                  <button><strong>31</strong><span>十九</span></button>
+                  <button class="outside"><strong>1</strong><span>二十</span></button>
+                  <button class="outside"><strong>2</strong><span>廿一</span></button>
+                  <button class="outside"><strong>3</strong><span>廿二</span></button>
+                  <button class="outside"><strong>4</strong><span>廿三</span></button>
+                  <button class="outside"><strong>5</strong><span>廿四</span></button>
+                  <button class="outside"><strong>6</strong><span>廿五</span></button>
+                </div>
+              </div>
+            </section>
+
+            <section class="summary-strip">
+              <div><strong>18天</strong><span>本月记录</span></div>
+              <div><strong>6天</strong><span>连续打卡</span></div>
+              <div><strong>5次</strong><span>异常次数</span></div>
+            </section>
+
+            <section class="block empty-record-preview" hidden>
+              <strong>这一天还没有健康记录</strong>
+              <span>创建后可以补录血压、血糖、体重、饮食、心情与待办。</span>
+              <button type="button">开始补录</button>
+            </section>
+
+            <section class="metric-grid">
+              <div class="card">
+                <span>血压</span>
+                <strong>138/86</strong>
+                <em>偏高</em>
+              </div>
+              <div class="card">
+                <span>空腹血糖</span>
+                <strong>6.8</strong>
+                <em>预警</em>
+              </div>
+              <div class="card">
+                <span>餐后血糖</span>
+                <strong>8.6</strong>
+                <em class="ok">可控</em>
+              </div>
+              <div class="card">
+                <span>体重</span>
+                <strong>74kg</strong>
+                <em class="ok">稳定</em>
+              </div>
+            </section>
+
+            <section class="block">
+              <header>
+                <h2>快速补录</h2>
+                <span>保存后同步后端</span>
+              </header>
+              <div class="form-demo">
+                <div><span>晨间血压</span><strong>138/86 mmHg</strong></div>
+                <div><span>空腹血糖</span><strong>6.8 mmol/L</strong></div>
+                <div><span>餐后血糖</span><strong>8.6 mmol/L</strong></div>
+                <div><span>今日体重</span><strong>74 kg</strong></div>
+              </div>
+            </section>
+
+            <section class="block">
+              <header>
+                <h2>今日待办</h2>
+                <span>可编辑事项</span>
+              </header>
+              <div class="todo-preview">
+                <div><input value="晨间血压" /><button class="done">已完成</button><button>删</button></div>
+                <div><input value="空腹血糖" /><button class="done">已完成</button><button>删</button></div>
+                <div><input value="三餐饮食" /><button class="done">已完成</button><button>删</button></div>
+                <div><input value="晚间复测" /><button class="pending">待记录</button><button>删</button></div>
+                <div><input value="用药打卡" /><button class="done">已完成</button><button>删</button></div>
+                <button class="add-todo-preview" type="button">添加待办</button>
+              </div>
+            </section>
+
+            <section class="block daily-note-preview">
+              <header>
+                <h2>今日状态</h2>
+                <span>心情与备注</span>
+              </header>
+              <div class="note-preview-form">
+                <label><span>当前状态</span><select><option>平稳</option><option>愉快</option><option>疲惫</option><option>焦虑</option><option>不适</option></select></label>
+                <textarea maxlength="500" placeholder="记录今天的身体感受、用药情况或需要关注的事项"></textarea>
+                <button type="button">保存状态</button>
+              </div>
+            </section>
+
+            <section class="block">
+              <header>
+                <h2>三餐记录</h2>
+                <span>今日录入</span>
+              </header>
+              <div class="list">
+                <div><strong>早餐</strong><span>燕麦粥、鸡蛋、无糖豆浆</span><em>已记录</em></div>
+                <div><strong>午餐</strong><span>糙米饭、清蒸鱼、青菜</span><em>已记录</em></div>
+                <div><strong>晚餐</strong><span>杂粮馒头、鸡胸肉、凉拌黄瓜</span><em>待确认</em></div>
+              </div>
+            </section>
+
+            <section class="block health-trend-preview">
+              <header>
+                <h2>健康趋势</h2>
+                <div class="trend-range-preview" aria-label="趋势时间范围">
+                  <button class="active" type="button" data-range="7d">7 天</button>
+                  <button type="button" data-range="30d">30 天</button>
+                </div>
+              </header>
+              <div id="web-trend-chart" role="img" aria-label="血压和空腹血糖趋势折线图"></div>
+              <p class="trend-empty-preview" hidden>该时间范围暂无体征记录</p>
+            </section>
+
+            <section class="block">
+              <header>
+                <h2>未来 3 天预测</h2>
+                <span>模型输出</span>
+              </header>
+              <div class="list">
+                <div><strong>明日</strong><span>血压 136/84 · 血糖 6.5</span><em>中风险</em></div>
+                <div><strong>后天</strong><span>血压 134/83 · 血糖 6.3</span><em>关注</em></div>
+                <div><strong>第 3 天</strong><span>血压 132/82 · 血糖 6.1</span><em class="ok">可控</em></div>
+              </div>
+            </section>
+
+            <section class="block" id="report-upload">
+              <header>
+                <h2>报告上传</h2>
+                <span>图片 / 拍照</span>
+              </header>
+              <div class="upload-picker">
+                <button class="dropzone-preview" type="button" aria-label="上传体检报告图片">
+                  <span class="preview-camera"><i></i></span>
+                  <strong>上传体检报告图片</strong>
+                  <span>点击后选择图片或进行拍照</span>
+                </button>
+                <div class="choice-panel" aria-label="上传方式">
+                  <button type="button">选择图片</button>
+                  <button type="button">进行拍照</button>
+                </div>
+              </div>
+              <div class="file-card">
+                <div class="file-mark image">图</div>
+                <div>
+                  <strong>待识别报告图片.jpg</strong>
+                  <span>图片 · 相册/拍照 · 待识别</span>
+                  <p>选择报告图片后点击开始识别，前端会模拟 OCR 识别加载。</p>
+                  <button class="start-ocr-preview" type="button">开始识别</button>
+                </div>
+              </div>
+              <div class="recognition-progress">
+                <div>
+                  <strong>OCR 识别加载</strong>
+                  <span class="progress-label">0%</span>
+                </div>
+                <b><i class="progress-fill" style="width: 0%"></i></b>
+                <p class="progress-text">等待开始识别</p>
+              </div>
+              <div class="report-detail-preview">
+                <header>
+                  <div>
+                    <strong class="report-detail-title">报告详情</strong>
+                    <span class="report-detail-status">等待选择报告</span>
+                  </div>
+                  <button class="report-edit-preview" type="button">人工纠错</button>
+                </header>
+                <p class="report-detail-summary">识别完成后可在这里复核指标。</p>
+                <div class="report-indicator-preview"></div>
+                <div class="report-actions-preview">
+                  <button class="report-save-preview" type="button" disabled>保存纠错</button>
+                  <button class="report-confirm-preview" type="button">确认报告</button>
+                  <button class="report-rerecognize-preview" type="button">重新识别</button>
+                  <button class="report-delete-preview danger" type="button">删除报告</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="block warn">
+              <h2>异常提醒</h2>
+              <p>空腹血糖高于建议范围，晚餐主食建议减量；收缩压接近 140 mmHg，今晚建议低盐饮食并复测。</p>
+            </section>
+          </article>
+
+          <article class="page" id="ai">
+            <section class="assistant-card">
+              <div class="assistant-mark">AI</div>
+              <div>
+                <h1>健康对话助手</h1>
+                <p>结合每日记录、体检报告和知识库给出建议</p>
+              </div>
+              <span>在线</span>
+            </section>
+            <section class="context-mini">
+              <div><strong>今日记录</strong><span>已读取</span></div>
+              <div><strong>中风险</strong><span>风险等级</span></div>
+              <div><strong>3 条</strong><span>知识命中</span></div>
+            </section>
+            <section class="quick-preview">
+              <button class="active">晚饭怎么吃</button>
+              <button>血压偏高怎么办</button>
+              <button>报告异常怎么看</button>
+            </section>
+            <section class="chat-panel-preview" id="ai-chat">
+              <header>
+                <div>
+                  <h2>当前对话</h2>
+                  <span>静态 demo · 后续接入大模型接口</span>
+                </div>
+                <button>新对话</button>
+              </header>
+              <div class="message assistant">
+                <b>AI</b>
+                <div><small>AI 助手 · 09:18</small><p>我已读取你今天的血压、血糖和饮食记录，可以帮你分析风险或生成饮食计划。</p></div>
+              </div>
+              <div class="message user">
+                <b>我</b>
+                <div><small>我 · 09:20</small><p>最近空腹血糖偏高，晚饭应该怎么吃？</p></div>
+              </div>
+              <div class="message assistant">
+                <b>AI</b>
+                <div><small>AI 助手 · 09:20</small><p>晚餐主食建议控制在半碗左右，优先选择杂粮、豆制品和深色蔬菜，饭后散步 20-30 分钟。</p></div>
+              </div>
+              <div class="chat-composer">
+                <span>输入你的健康问题</span>
+                <button>发送</button>
+              </div>
+            </section>
+            <section class="block">
+              <header>
+                <h2>对话记录</h2>
+                <span>最近咨询</span>
+              </header>
+              <div class="history-preview">
+                <div><strong>晚饭怎么吃</strong><span>根据空腹血糖 6.8 生成晚餐建议</span><em>今日 09:20</em></div>
+                <div><strong>血压偏高怎么办</strong><span>解释收缩压 138 的居家处理方式</span><em>昨日 21:10</em></div>
+                <div><strong>报告异常怎么看</strong><span>解读空腹血糖和总胆固醇异常</span><em>8/12 18:45</em></div>
+              </div>
+            </section>
+            <section class="block">
+              <header>
+                <h2>风险摘要</h2>
+                <span>来自每日记录</span>
+              </header>
+              <div class="metric-grid small">
+                <div class="card"><span>空腹血糖</span><strong>6.8</strong><em>中风险</em></div>
+                <div class="card"><span>收缩压</span><strong>138</strong><em>关注</em></div>
+              </div>
+            </section>
+          </article>
+
+          <article class="page" id="mine">
+            <section class="mine-hero">
+              <div class="avatar"><span>李</span></div>
+              <div>
+                <h1>李明</h1>
+                <span>年龄：56 岁</span>
+                <span>电话：138****0926</span>
+              </div>
+            </section>
+            <section class="block account-profile-preview">
+              <header>
+                <h2>个人资料</h2>
+                <span>头像、昵称与联系方式</span>
+              </header>
+              <div class="account-edit-preview">
+                <label><span>昵称</span><input data-profile="nickname" maxlength="30" value="李明" /></label>
+                <label><span>手机号</span><input data-profile="phone" maxlength="11" inputmode="numeric" value="13800000926" /></label>
+              </div>
+              <div class="avatar-actions-preview">
+                <label class="avatar-upload-preview">选择头像<input type="file" accept="image/jpeg,image/png,image/webp" /></label>
+                <button class="avatar-remove-preview" type="button">移除头像</button>
+              </div>
+              <button class="account-save-preview" type="button">保存个人资料</button>
+              <p>正式微信昵称和手机号授权需要原项目管理员配置；当前预览支持手工维护并上传头像。</p>
+            </section>
+            <section class="block">
+              <header>
+                <h2>健康档案摘要</h2>
+                <span>可编辑</span>
+              </header>
+              <div class="profile-edit-preview">
+                <label><span>性别</span><input value="男" /></label>
+                <label><span>年龄</span><input value="56 岁" /></label>
+                <label><span>身高</span><input value="172 cm" /></label>
+                <label><span>体重</span><input value="74 kg" /></label>
+                <label><span>BMI</span><input value="25.1" readonly /></label>
+                <label><span>三高类型</span><input value="高血压 + 高血糖" /></label>
+                <label class="wide"><span>既往病史</span><input value="轻度脂肪肝" /></label>
+                <label class="wide"><span>用药</span><input value="二甲双胍、氨氯地平" /></label>
+              </div>
+              <button class="profile-save-preview" type="button">保存健康档案</button>
+            </section>
+            <section class="block">
+              <header>
+                <h2>提醒与设置</h2>
+              </header>
+              <div class="settings-preview">
+                <label><strong>异常预警推送</strong><input type="checkbox" data-setting="alert_push_enabled" checked /></label>
+                <label><strong>每日记录提醒</strong><input type="checkbox" data-setting="daily_record_reminder_enabled" checked /></label>
+                <label><strong>提醒时间</strong><input type="time" data-setting="daily_record_reminder_time" value="20:30" /></label>
+              </div>
+            </section>
+          </article>
+        </section>
+
+        <nav class="tabbar" aria-label="小程序底部导航">
+          <button class="active" data-target="daily">每日记录</button>
+          <button data-target="ai">AI</button>
+          <button data-target="mine">我的</button>
+        </nav>
+      </section>
+    </main>
+    <script src="./echarts.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

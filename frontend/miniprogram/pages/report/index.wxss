@@ -1,0 +1,93 @@
+.report-hero {
+  background: linear-gradient(135deg, #7c3aed 0%, #0f766e 95%);
+}
+
+.upload-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.upload-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.upload-title {
+  display: block;
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.upload-desc {
+  display: block;
+  margin-top: 8rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+.upload-button {
+  flex-shrink: 0;
+  margin-left: 18rpx;
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.step-dot {
+  width: 22rpx;
+  height: 22rpx;
+  margin: 8rpx 18rpx 0 0;
+  border-radius: 999rpx;
+  background: #cbd5e1;
+}
+
+.step-active {
+  background: #0f766e;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title,
+.indicator-name {
+  display: block;
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.step-desc {
+  display: block;
+  margin-top: 8rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.indicator-value {
+  display: block;
+  margin: 12rpx 0 6rpx;
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.review-meta {
+  margin-top: 18rpx;
+  color: #0f766e;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.review-note {
+  display: block;
+  margin-top: 12rpx;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}
