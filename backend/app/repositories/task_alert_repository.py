@@ -213,7 +213,13 @@ def bootstrap_task_alert_data(store):
         template=DailyTaskTemplate(id=source["id"],user_id=source.get("user_id",1),version_no=source["version_no"],effective_from=_date(source["effective_from"]),effective_to=_date(source["effective_to"]) if source.get("effective_to") else None,is_active=source.get("is_active",True),created_at=_datetime(source.get("created_at")) or _now(),updated_at=_datetime(source.get("updated_at")) or _now())
         db.session.merge(template)
         for item in source.get("items",[]):db.session.merge(DailyTaskTemplateItem(id=item["id"],template_id=source["id"],task_name=item["task_name"],sort_order=item.get("sort_order",0),is_required=item.get("is_required",True),created_at=_datetime(item.get("created_at")) or _now()))
+    db.session.flush()
+    existing_record_ids = {
+        row[0] for row in db.session.query(DailyRecord.id).all()
+    }
     for record_id,sources in store.tasks_by_record_id.items():
+        if int(record_id) not in existing_record_ids:
+            continue
         for s in sources:db.session.merge(DailyTask(id=s["id"],daily_record_id=int(record_id),user_id=s.get("user_id",1),record_date=_date(s["record_date"]),template_id=s["template_id"],template_item_id=s["template_item_id"],task_name_snapshot=s["task_name_snapshot"],is_done=s.get("is_done",False),completed_at=_datetime(s.get("completed_at")),sort_order=s.get("sort_order",0),created_at=_datetime(s.get("created_at")) or _now(),updated_at=_datetime(s.get("updated_at")) or _now()))
     for s in store.alerts.values():db.session.merge(HealthAlert(id=s["id"],user_id=s.get("user_id",1),alert_type=s.get("alert_type","vital"),record_date=_date(s["date"]),source_type=s.get("source_type","vital"),source_id=s.get("source_id"),title=s["title"],content=s["content"],description=s.get("description",s["content"]),risk_level=s.get("risk_level",s.get("level","low")),is_read=s.get("is_read",False),created_at=_datetime(s.get("created_at")) or _now()))
     db.session.commit()

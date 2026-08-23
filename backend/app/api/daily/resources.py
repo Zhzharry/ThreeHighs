@@ -111,7 +111,32 @@ class DailyTaskTemplateCurrentResource(Resource):
         payload = json_body()
         effective_date = payload.get("effective_date", today_str())
         items = payload.get("items", [])
-        return success(store.update_template(effective_date, items, current_user_id()))
+        try:
+            parse_date(effective_date)
+        except (TypeError, ValueError):
+            return fail("effective_date 格式必须为 YYYY-MM-DD")
+        if not isinstance(items, list):
+            return fail("items 必须是数组")
+        normalized_items = []
+        for index, item in enumerate(items, start=1):
+            if not isinstance(item, dict):
+                return fail(f"第 {index} 项待办格式无效")
+            task_name = str(item.get("task_name", "")).strip()
+            if not task_name:
+                continue
+            if len(task_name) > 100:
+                return fail(f"第 {index} 项待办名称不能超过 100 个字符")
+            try:
+                sort_order = int(item.get("sort_order") or len(normalized_items) + 1)
+            except (TypeError, ValueError):
+                return fail(f"第 {index} 项待办排序必须是数字")
+            normalized_items.append({
+                "task_name": task_name,
+                "sort_order": sort_order,
+            })
+        if not normalized_items:
+            return fail("请至少保留一条待办事项")
+        return success(store.update_template(effective_date, normalized_items, current_user_id()))
 
 
 class DailyTasksGenerateResource(Resource):

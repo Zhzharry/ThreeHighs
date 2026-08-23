@@ -23,8 +23,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "Docker Compose 配置检查失败。"
 }
 
-Write-Host "正在构建并启动 MySQL、Redis 和小程序后端..." -ForegroundColor Cyan
-docker compose up -d --build mysql redis backend-api
+Write-Host "正在构建并启动 MySQL、Redis、后端 API 和前端预览..." -ForegroundColor Cyan
+docker compose up -d --build mysql redis backend-api frontend-preview
 if ($LASTEXITCODE -ne 0) {
     throw "Docker 服务启动失败，请查看上方输出。"
 }
@@ -51,7 +51,8 @@ if (-not $ready) {
 
 Write-Host ""
 Write-Host "启动成功" -ForegroundColor Green
+Write-Host "前端预览页面：http://127.0.0.1:8088/"
 Write-Host "后端健康检查：$healthUrl"
 Write-Host ""
-Write-Host "请在微信开发者工具中导入当前目录并点击编译；前端界面只在小程序模拟器或真机中验收。" -ForegroundColor Yellow
+Write-Host "网页预览用于快速看界面和联调；微信小程序真机/模拟器请在微信开发者工具中导入当前目录并点击编译。" -ForegroundColor Yellow
 Write-Host "没有原 AppID 成员权限时，请改用测试号或自己的 AppID。" -ForegroundColor Yellow

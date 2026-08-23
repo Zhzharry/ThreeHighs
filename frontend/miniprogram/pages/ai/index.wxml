@@ -62,9 +62,15 @@
     </view>
 
     <view class="chat-input">
-      <view class="fake-chat-input">
-        <text>{{draftText}}</text>
-      </view>
+      <input
+        class="real-chat-input"
+        value="{{draftText}}"
+        placeholder="输入你的健康问题"
+        maxlength="200"
+        confirm-type="send"
+        bindinput="editDraftText"
+        bindconfirm="sendCurrentQuestion"
+      />
       <button class="send-button" bindtap="sendCurrentQuestion" disabled="{{isSending}}">{{isSending ? '发送中' : '发送'}}</button>
     </view>
   </view>
@@ -75,7 +81,7 @@
       <text class="section-note">最近咨询</text>
     </view>
     <view class="history-list">
-      <view class="history-row" wx:for="{{chatRecords}}" wx:key="title">
+      <view class="history-row" wx:for="{{chatRecords}}" wx:key="title" data-id="{{item.id}}" bindtap="openConversationFromHistory">
         <view>
           <text class="history-title">{{item.title}}</text>
           <text class="history-desc">{{item.desc}}</text>

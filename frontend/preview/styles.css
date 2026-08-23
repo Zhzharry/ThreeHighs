@@ -1362,12 +1362,15 @@ button {
   border-top: 1px solid #eef2f7;
 }
 
-.chat-composer span {
+.chat-composer input {
   flex: 1;
+  min-width: 0;
   padding: 11px 14px;
+  border: 0;
   border-radius: 999px;
-  color: #94a3b8;
+  color: #111827;
   background: #f1f5f9;
+  font: inherit;
   font-size: 13px;
 }
 
@@ -1385,12 +1388,18 @@ button {
   border-radius: 10px;
 }
 
-.history-preview div {
+.history-preview button {
+  display: block;
+  width: 100%;
   padding: 13px;
+  border: 0;
   border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  background: #ffffff;
+  cursor: pointer;
 }
 
-.history-preview div:last-child {
+.history-preview button:last-child {
   border-bottom: 0;
 }
 

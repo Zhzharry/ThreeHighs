@@ -1,5 +1,6 @@
 from pathlib import Path
 from uuid import uuid4
+from pathlib import Path
 
 from flask import current_app, request
 from flask_restful import Resource

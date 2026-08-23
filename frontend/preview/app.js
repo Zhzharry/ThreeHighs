@@ -50,15 +50,30 @@ async function ensureLogin() {
   return loginPromise
 }
 
-async function apiGet(path) {
+function clearAccessToken() {
+  accessToken = ""
+  sessionStorage.removeItem("access_token")
+}
+
+function isAuthExpired(status, payload) {
+  return status === 401 || (payload && Number(payload.code) >= 40100 && Number(payload.code) < 40200)
+}
+
+async function apiGet(path, canRetryAuth = true) {
   await ensureLogin()
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   })
-  return response.json()
+  const payload = await response.json()
+  if (isAuthExpired(response.status, payload) && canRetryAuth) {
+    clearAccessToken()
+    await ensureLogin()
+    return apiGet(path, false)
+  }
+  return payload
 }
 
-async function apiSend(path, method, data) {
+async function apiSend(path, method, data, canRetryAuth = true) {
   await ensureLogin()
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
@@ -68,7 +83,13 @@ async function apiSend(path, method, data) {
     },
     body: data ? JSON.stringify(data) : undefined
   })
-  return response.json()
+  const payload = await response.json()
+  if (isAuthExpired(response.status, payload) && canRetryAuth) {
+    clearAccessToken()
+    await ensureLogin()
+    return apiSend(path, method, data, false)
+  }
+  return payload
 }
 
 function apiOk(response) {
@@ -579,7 +600,7 @@ async function loadDaily() {
   }
 }
 
-async function uploadDemoReport(sourceText) {
+async function uploadDemoReport(sourceText, canRetryAuth = true) {
   await ensureLogin()
   const fileName = sourceText.includes("拍照") ? "拍照体检报告.jpg" : "体检报告图片.jpg"
   const form = new FormData()
@@ -591,10 +612,19 @@ async function uploadDemoReport(sourceText) {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
     body: form
-  }).then((item) => item.json())
+  }).then(async (item) => ({ status: item.status, payload: await item.json() }))
 
-  if (!apiOk(response)) return
-  currentReportId = response.data.report_id
+  if (isAuthExpired(response.status, response.payload) && canRetryAuth) {
+    clearAccessToken()
+    await ensureLogin()
+    return uploadDemoReport(sourceText, false)
+  }
+
+  if (!apiOk(response.payload)) {
+    if (progressText) progressText.textContent = response.payload?.message || "上传失败，请检查后端服务"
+    return
+  }
+  currentReportId = response.payload.data.report_id
 
   const fileTitle = document.querySelector(".file-card strong")
   const fileMeta = document.querySelector(".file-card span")
@@ -796,12 +826,19 @@ function renderConversationHistory(items) {
   const list = document.querySelector(".history-preview")
   if (!list) return
   list.innerHTML = items.map((item) => `
-    <div>
+    <button type="button" data-conversation-id="${item.id}">
       <strong>${escapeHtml(item.title)}</strong>
       <span>${escapeHtml(item.last_message || "暂无消息")}</span>
       <em>${timeText(item.updated_at)}</em>
-    </div>
+    </button>
   `).join("")
+  list.querySelectorAll("button[data-conversation-id]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      currentConversationId = Number(button.dataset.conversationId)
+      const messages = await apiGet(`/ai/conversations/${currentConversationId}/messages`)
+      if (apiOk(messages)) renderMessages(messages.data)
+    })
+  })
 }
 
 async function ensureConversation(title) {
@@ -811,34 +848,57 @@ async function ensureConversation(title) {
     source: "preview",
     related_date: formatToday()
   })
+  if (!apiOk(response)) throw new Error(response.message || "创建会话失败")
   currentConversationId = response.data.conversation_id
   return currentConversationId
 }
 
 async function sendAiQuestion(question) {
-  const conversationId = await ensureConversation(question)
-  renderMessages([
-    { role: "user", content: question, created_at: "刚刚" },
-    { role: "assistant", content: "正在结合你的每日记录生成建议...", created_at: "刚刚" }
-  ])
+  const normalizedQuestion = String(question || "").trim()
+  if (!normalizedQuestion) return
+  const sendButton = document.querySelector(".chat-composer button")
+  if (sendButton) {
+    sendButton.disabled = true
+    sendButton.textContent = "发送中"
+  }
 
-  const response = await apiSend(`/ai/conversations/${conversationId}/messages`, "POST", {
-    content: question,
-    use_daily_context: true,
-    related_date: formatToday()
-  })
+  try {
+    const conversationId = await ensureConversation(normalizedQuestion)
+    renderMessages([
+      { role: "user", content: normalizedQuestion, created_at: "刚刚" },
+      { role: "assistant", content: "正在结合你的每日记录生成建议...", created_at: "刚刚" }
+    ])
 
-  if (apiOk(response)) {
-    renderMessages([response.data.user_message, response.data.assistant_message])
+    const response = await apiSend(`/ai/conversations/${conversationId}/messages`, "POST", {
+      content: normalizedQuestion,
+      use_daily_context: true,
+      related_date: formatToday()
+    })
+
+    if (!apiOk(response)) throw new Error(response.message || "AI 回复失败")
+    const messages = await apiGet(`/ai/conversations/${conversationId}/messages`)
+    if (apiOk(messages)) renderMessages(messages.data)
     const conversations = await apiGet("/ai/conversations")
-    if (apiOk(conversations)) renderConversationHistory(conversations.data.items)
+    if (apiOk(conversations)) {
+      renderConversationHistory(conversations.data.items)
+    }
+  } catch (error) {
+    renderMessages([
+      { role: "user", content: normalizedQuestion, created_at: "刚刚" },
+      { role: "assistant", content: error.message || "AI 接口暂时不可用，请稍后重试。", created_at: "刚刚" }
+    ])
+  } finally {
+    if (sendButton) {
+      sendButton.disabled = false
+      sendButton.textContent = "发送"
+    }
   }
 }
 
 function bindAiButtons() {
   const newChatButton = document.querySelector(".chat-panel-preview header button")
   const sendButton = document.querySelector(".chat-composer button")
-  const inputHint = document.querySelector(".chat-composer span")
+  const input = document.querySelector(".chat-composer input")
 
   if (newChatButton) {
     newChatButton.addEventListener("click", async () => {
@@ -857,7 +917,18 @@ function bindAiButtons() {
 
   if (sendButton) {
     sendButton.addEventListener("click", () => {
-      sendAiQuestion(inputHint?.textContent || "晚饭怎么吃")
+      const question = input?.value || ""
+      if (input) input.value = ""
+      sendAiQuestion(question)
+    })
+  }
+
+  if (input) {
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return
+      const question = input.value
+      input.value = ""
+      sendAiQuestion(question)
     })
   }
 }
