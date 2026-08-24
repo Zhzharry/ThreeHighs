@@ -1528,6 +1528,26 @@ button {
   background: #0f766e;
 }
 
+.account-save-preview.inactive,
+.account-save-preview:disabled {
+  color: #94a3b8;
+  background: #e5e7eb;
+  cursor: default;
+}
+
+.account-save-preview.active {
+  color: #ffffff;
+  background: #0f766e;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
+}
+
+.account-pending-preview {
+  margin: 9px 0 0;
+  color: #0f766e;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .account-profile-preview > p {
   margin: 10px 0 0;
   color: #94a3b8;

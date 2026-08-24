@@ -149,6 +149,26 @@
   margin-top: 20rpx;
 }
 
+.profile-save-button.inactive,
+.profile-save-button[disabled] {
+  color: #94a3b8;
+  background: #e5e7eb;
+}
+
+.profile-save-button.active {
+  color: #ffffff;
+  background: #0f766e;
+  box-shadow: 0 12rpx 26rpx rgba(15, 118, 110, 0.18);
+}
+
+.pending-note {
+  display: block;
+  margin-top: 14rpx;
+  color: #0f766e;
+  font-size: 23rpx;
+  line-height: 32rpx;
+}
+
 .account-form {
   overflow: hidden;
   border: 1rpx solid #e5e7eb;

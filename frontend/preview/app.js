@@ -27,6 +27,18 @@ let progressTimer = null
 let taskSyncTimer = null
 let accessToken = sessionStorage.getItem("access_token") || ""
 let loginPromise = null
+const WECHAT_PROFILE_PROMPT_KEY = "preview_wechat_profile_prompted"
+let accountProfileState = {
+  saved: { nickname: "李明", phone: "13800000926", avatarUrl: "" },
+  current: { nickname: "李明", phone: "13800000926", avatarUrl: "" },
+  avatarFile: null,
+  avatarRemoved: false
+}
+
+function maskPhone(phone) {
+  const value = String(phone || "")
+  return value.length === 11 ? `${value.slice(0, 3)}****${value.slice(-4)}` : value || "未填写"
+}
 
 function setApiStatus(text, connected = true) {
   if (!topbarStatus) return
@@ -943,6 +955,14 @@ async function loadMine() {
     if (apiOk(profile)) {
       const user = profile.data.user
       const health = profile.data.health_profile
+      accountProfileState.saved = {
+        nickname: user.nickname || "",
+        phone: user.phone || "",
+        avatarUrl: user.avatar_url || ""
+      }
+      accountProfileState.current = { ...accountProfileState.saved }
+      accountProfileState.avatarFile = null
+      accountProfileState.avatarRemoved = false
       const hero = document.querySelector("#mine .mine-hero")
       if (hero) {
         const avatar = hero.querySelector(".avatar")
@@ -953,13 +973,14 @@ async function loadMine() {
           : `<span>${escapeHtml(user.nickname.slice(0, 1))}</span>`
         if (name) name.textContent = user.nickname
         if (spans[0]) spans[0].textContent = `年龄：${user.age} 岁`
-        if (spans[1]) spans[1].textContent = `电话：${user.phone}`
+        if (spans[1]) spans[1].textContent = `电话：${user.phone_masked || maskPhone(user.phone)}`
       }
 
       const nicknameInput = document.querySelector('[data-profile="nickname"]')
       const phoneInput = document.querySelector('[data-profile="phone"]')
       if (nicknameInput) nicknameInput.value = user.nickname || ""
       if (phoneInput) phoneInput.value = user.phone || ""
+      updateAccountSaveState()
 
       const values = [
         health.gender,
@@ -1024,6 +1045,40 @@ function renderWebAvatar(avatarUrl, nickname) {
     : `<span>${escapeHtml((nickname || "用").slice(0, 1))}</span>`
 }
 
+function updateAccountSaveState() {
+  const saveButton = document.querySelector(".account-save-preview")
+  const pending = document.querySelector(".account-pending-preview")
+  const saved = accountProfileState.saved
+  const current = accountProfileState.current
+  const dirty = current.nickname !== saved.nickname
+    || current.phone !== saved.phone
+    || current.avatarUrl !== saved.avatarUrl
+  if (saveButton) {
+    saveButton.disabled = !dirty
+    saveButton.classList.toggle("active", dirty)
+    saveButton.classList.toggle("inactive", !dirty)
+  }
+  if (pending) pending.hidden = !dirty
+  return dirty
+}
+
+function setAccountCurrent(nextValues) {
+  accountProfileState.current = { ...accountProfileState.current, ...nextValues }
+  const hero = document.querySelector("#mine .mine-hero")
+  if (hero?.querySelector("h1")) hero.querySelector("h1").textContent = accountProfileState.current.nickname || "未填写"
+  const spans = hero?.querySelectorAll("div:nth-child(2) > span") || []
+  if (spans[1]) spans[1].textContent = `电话：${maskPhone(accountProfileState.current.phone)}`
+  renderWebAvatar(accountProfileState.current.avatarUrl, accountProfileState.current.nickname)
+  updateAccountSaveState()
+}
+
+function promptPreviewWechatProfileIfNeeded() {
+  if (localStorage.getItem(WECHAT_PROFILE_PROMPT_KEY)) return
+  localStorage.setItem(WECHAT_PROFILE_PROMPT_KEY, "1")
+  if (!window.confirm("是否使用微信头像和微信昵称作为个人资料？")) return
+  window.alert("浏览器预览不能直接读取微信资料。请在微信开发者工具里点击“使用”，或在这里手动编辑昵称并选择头像。")
+}
+
 function bindAccountProfile() {
   const nicknameInput = document.querySelector('[data-profile="nickname"]')
   const phoneInput = document.querySelector('[data-profile="phone"]')
@@ -1031,25 +1086,64 @@ function bindAccountProfile() {
   const fileInput = document.querySelector(".avatar-upload-preview input")
   const removeButton = document.querySelector(".avatar-remove-preview")
 
+  nicknameInput?.addEventListener("input", () => {
+    setAccountCurrent({ nickname: nicknameInput.value.trim() })
+  })
+
+  phoneInput?.addEventListener("input", () => {
+    setAccountCurrent({ phone: phoneInput.value.trim() })
+  })
+
   saveButton?.addEventListener("click", async () => {
     const nickname = nicknameInput.value.trim()
     const phone = phoneInput.value.trim()
+    if (!updateAccountSaveState()) return
     if (!nickname || nickname.length > 30) return window.alert("昵称长度应为1到30个字符")
     if (phone && !/^1[3-9]\d{9}$/.test(phone)) return window.alert("请输入正确的手机号")
+    if (!window.confirm("确认保存当前头像、昵称和联系方式的修改吗？")) return
     saveButton.disabled = true
-    const response = await apiSend("/me/profile", "PUT", { nickname, phone })
-    saveButton.textContent = apiOk(response) ? "个人资料已保存" : response.message || "保存失败"
-    if (apiOk(response)) {
-      const hero = document.querySelector("#mine .mine-hero")
-      if (hero?.querySelector("h1")) hero.querySelector("h1").textContent = response.data.nickname
-      const spans = hero?.querySelectorAll("div:nth-child(2) > span") || []
-      if (spans[1]) spans[1].textContent = `电话：${response.data.phone}`
-      if (!hero?.querySelector(".avatar img")) renderWebAvatar("", response.data.nickname)
+    saveButton.textContent = "保存中..."
+    let avatarUrl = accountProfileState.current.avatarUrl
+    try {
+      if (accountProfileState.avatarRemoved) {
+        const avatarResponse = await apiSend("/me/avatar", "DELETE")
+        if (!apiOk(avatarResponse)) throw new Error(avatarResponse.message || "头像移除失败")
+        avatarUrl = ""
+      } else if (accountProfileState.avatarFile) {
+        await ensureLogin()
+        const form = new FormData()
+        form.append("file", accountProfileState.avatarFile)
+        const avatarResponse = await fetch(`${API_BASE_URL}/me/avatar`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: form
+        }).then((item) => item.json())
+        if (!apiOk(avatarResponse)) throw new Error(avatarResponse.message || "头像上传失败")
+        avatarUrl = avatarResponse.data.avatar_url || avatarUrl
+      }
+      const response = await apiSend("/me/profile", "PUT", { nickname, phone, avatar_url: avatarUrl })
+      if (!apiOk(response)) throw new Error(response.message || "保存失败")
+      accountProfileState.saved = {
+        nickname: response.data.nickname,
+        phone,
+        avatarUrl: response.data.avatar_url || avatarUrl || ""
+      }
+      accountProfileState.current = { ...accountProfileState.saved }
+      accountProfileState.avatarFile = null
+      accountProfileState.avatarRemoved = false
+      setAccountCurrent(accountProfileState.current)
+      saveButton.textContent = "个人资料已保存"
+    } catch (error) {
+      window.alert(error.message || "保存失败")
+      saveButton.textContent = "保存个人资料"
     }
-    setTimeout(() => { saveButton.disabled = false; saveButton.textContent = "保存个人资料" }, 1200)
+    setTimeout(() => {
+      saveButton.textContent = "保存个人资料"
+      updateAccountSaveState()
+    }, 1200)
   })
 
-  fileInput?.addEventListener("change", async () => {
+  fileInput?.addEventListener("change", () => {
     const file = fileInput.files?.[0]
     if (!file) return
     if (file.size > 2 * 1024 * 1024) {
@@ -1057,24 +1151,19 @@ function bindAccountProfile() {
       fileInput.value = ""
       return
     }
-    await ensureLogin()
-    const form = new FormData()
-    form.append("file", file)
-    const response = await fetch(`${API_BASE_URL}/me/avatar`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body: form
-    }).then((item) => item.json())
-    if (apiOk(response)) renderWebAvatar(response.data.avatar_url, nicknameInput?.value)
-    else window.alert(response.message || "头像上传失败")
+    accountProfileState.avatarFile = file
+    accountProfileState.avatarRemoved = false
+    setAccountCurrent({ avatarUrl: URL.createObjectURL(file) })
+    window.alert("已选择头像，点击保存后才会上传。")
     fileInput.value = ""
   })
 
-  removeButton?.addEventListener("click", async () => {
+  removeButton?.addEventListener("click", () => {
     if (!window.confirm("确定移除当前头像吗？")) return
-    const response = await apiSend("/me/avatar", "DELETE")
-    if (apiOk(response)) renderWebAvatar("", nicknameInput?.value)
-    else window.alert(response.message || "头像移除失败")
+    accountProfileState.avatarFile = null
+    accountProfileState.avatarRemoved = true
+    setAccountCurrent({ avatarUrl: "" })
+    window.alert("已移除头像，点击保存后才会同步。")
   })
 }
 
@@ -1121,4 +1210,5 @@ bindMineSettings()
 loadDaily()
 loadAi()
 loadMine()
+setTimeout(promptPreviewWechatProfileIfNeeded, 600)
 applyHashTarget()

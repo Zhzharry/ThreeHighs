@@ -19,7 +19,7 @@
     <view class="account-form">
       <label class="account-field">
         <text>昵称</text>
-        <input value="{{profileForm.nickname}}" maxlength="30" data-field="nickname" bindinput="editUserField" placeholder="请输入昵称" />
+        <input type="nickname" value="{{profileForm.nickname}}" maxlength="30" data-field="nickname" bindinput="editUserField" placeholder="请输入昵称" />
       </label>
       <label class="account-field">
         <text>手机号</text>
@@ -28,9 +28,10 @@
     </view>
     <view class="account-actions">
       <button class="button secondary-button" open-type="chooseAvatar" bindchooseavatar="chooseAvatar" loading="{{isUploadingAvatar}}">选择微信头像</button>
-      <button class="button ghost-danger" bindtap="removeAvatar" disabled="{{!user.avatarUrl || isUploadingAvatar}}">移除头像</button>
+      <button class="button ghost-danger" bindtap="removeAvatar" disabled="{{!user.avatarUrl || isSavingProfile || isUploadingAvatar}}">移除头像</button>
     </view>
-    <button class="button save-button" bindtap="saveUserProfile" loading="{{isSavingProfile}}" disabled="{{isSavingProfile}}">保存个人资料</button>
+    <button class="button save-button profile-save-button {{isProfileDirty ? 'active' : 'inactive'}}" bindtap="saveUserProfile" loading="{{isSavingProfile || isUploadingAvatar}}" disabled="{{!isProfileDirty || isSavingProfile || isUploadingAvatar}}">保存个人资料</button>
+    <text wx:if="{{isProfileDirty}}" class="pending-note">资料已修改，保存后才会同步到后端。</text>
     <text class="permission-note">正式获取微信头像、昵称或手机号仍需原项目管理员配置对应权限；当前可使用微信头像选择器并手工维护资料。</text>
   </view>
 
