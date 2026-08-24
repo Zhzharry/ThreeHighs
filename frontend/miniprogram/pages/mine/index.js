@@ -28,6 +28,10 @@ function comparableProfileForm(form = {}) {
   }
 }
 
+function comparableHealthProfileItems(items = []) {
+  return items.map((item) => String(item.value || "").trim())
+}
+
 function formatProfileItems(profile = {}) {
   return [
     { label: "性别", value: profile.gender || "" },
@@ -81,6 +85,9 @@ Page({
       { label: "既往病史", value: "轻度脂肪肝" },
       { label: "用药", value: "二甲双胍、氨氯地平" }
     ],
+    savedHealthProfileItems: ["男", "56 岁", "172 cm", "74 kg", "25.1", "高血压 + 高血糖", "轻度脂肪肝", "二甲双胍、氨氯地平"],
+    isHealthProfileDirty: false,
+    isSavingHealthProfile: false,
     settings: [
       { label: "异常预警推送", value: "已开启" },
       { label: "每日记录提醒", value: "20:30" }
@@ -104,6 +111,7 @@ Page({
       const profile = response.data.health_profile
       const profileForm = profileFormFromUser(user)
       const savedProfileForm = comparableProfileForm(profileForm)
+      const profileItems = formatProfileItems(profile)
 
       this.setData({
         isBackendConnected: true,
@@ -117,7 +125,9 @@ Page({
         profileForm,
         savedProfileForm,
         isProfileDirty: false,
-        profileItems: formatProfileItems(profile)
+        profileItems,
+        savedHealthProfileItems: comparableHealthProfileItems(profileItems),
+        isHealthProfileDirty: false
       })
     }).catch(() => {
       wx.showToast({
@@ -147,6 +157,11 @@ Page({
     return current.nickname !== saved.nickname
       || current.phone !== saved.phone
       || current.avatarUrl !== saved.avatarUrl
+  },
+  hasHealthProfileChanged(profileItems = this.data.profileItems) {
+    const current = comparableHealthProfileItems(profileItems)
+    const saved = this.data.savedHealthProfileItems || []
+    return current.length !== saved.length || current.some((value, index) => value !== saved[index])
   },
   applyProfileForm(profileForm) {
     const nickname = profileForm.nickname || "未填写"
@@ -309,14 +324,20 @@ Page({
   editProfileItem(event) {
     const index = Number(event.currentTarget.dataset.index)
     const value = event.detail.value
-    this.setData({
-      [`profileItems[${index}].value`]: value
-    })
-    if (index === 1) {
-      this.setData({ "user.age": numberValue(value) || "" })
+    const profileItems = this.data.profileItems.map((item, itemIndex) => (
+      itemIndex === index ? { ...item, value } : item
+    ))
+    const nextData = {
+      profileItems,
+      isHealthProfileDirty: this.hasHealthProfileChanged(profileItems)
     }
+    if (index === 1) {
+      nextData["user.age"] = numberValue(value) || ""
+    }
+    this.setData(nextData)
   },
   saveHealthProfile() {
+    if (this.data.isSavingHealthProfile || !this.data.isHealthProfileDirty) return
     const items = this.data.profileItems
     const payload = {
       gender: items[0].value,
@@ -329,6 +350,7 @@ Page({
       chronic_types: ["hypertension", "diabetes"]
     }
 
+    this.setData({ isSavingHealthProfile: true })
     api.updateHealthProfile(payload).then((response) => {
       if (response.code !== 0) {
         wx.showToast({
@@ -337,9 +359,12 @@ Page({
         })
         return
       }
+      const profileItems = formatProfileItems(response.data)
 
       this.setData({
-        profileItems: formatProfileItems(response.data),
+        profileItems,
+        savedHealthProfileItems: comparableHealthProfileItems(profileItems),
+        isHealthProfileDirty: false,
         "user.age": response.data.age || "",
         isBackendConnected: true
       })
@@ -352,7 +377,7 @@ Page({
         title: "后端未连接",
         icon: "none"
       })
-    })
+    }).finally(() => this.setData({ isSavingHealthProfile: false }))
   },
   openLegalDocument(event) {
     wx.navigateTo({ url: `/pages/legal/index?type=${event.currentTarget.dataset.type}` })

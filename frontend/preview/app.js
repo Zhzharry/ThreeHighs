@@ -34,6 +34,10 @@ let accountProfileState = {
   avatarFile: null,
   avatarRemoved: false
 }
+let healthProfileState = {
+  saved: [],
+  current: []
+}
 
 function maskPhone(phone) {
   const value = String(phone || "")
@@ -992,6 +996,9 @@ async function loadMine() {
       document.querySelectorAll(".profile-edit-preview input").forEach((input, index) => {
         input.value = values[index] || ""
       })
+      healthProfileState.saved = values.map((value) => String(value || "").trim())
+      healthProfileState.current = [...healthProfileState.saved]
+      updateHealthProfileSaveState()
     }
 
     if (apiOk(settings)) {
@@ -1010,18 +1017,42 @@ async function loadMine() {
   }
 }
 
+function updateHealthProfileSaveState() {
+  const saveButton = profileSaveButton
+  const dirty = healthProfileState.current.length !== healthProfileState.saved.length
+    || healthProfileState.current.some((value, index) => value !== healthProfileState.saved[index])
+  if (saveButton) {
+    saveButton.disabled = !dirty
+    saveButton.classList.toggle("active", dirty)
+    saveButton.classList.toggle("inactive", !dirty)
+  }
+  return dirty
+}
+
 function bindMineSave() {
   if (!profileSaveButton) return
   const profileInputs = Array.from(document.querySelectorAll(".profile-edit-preview input"))
-  profileInputs[1]?.addEventListener("input", () => {
-    const matched = String(profileInputs[1].value || "").match(/\d+(\.\d+)?/)
-    const spans = document.querySelectorAll("#mine .mine-hero div:nth-child(2) > span")
-    if (spans[0]) spans[0].textContent = `年龄：${matched ? matched[0] : ""} 岁`
-  })
+  healthProfileState.current = profileInputs.map((item) => String(item.value || "").trim())
+  if (!healthProfileState.saved.length) {
+    healthProfileState.saved = [...healthProfileState.current]
+  }
+  updateHealthProfileSaveState()
+  profileInputs.forEach((input, index) => input.addEventListener("input", () => {
+    healthProfileState.current = profileInputs.map((item) => String(item.value || "").trim())
+    if (index === 1) {
+      const matched = String(input.value || "").match(/\d+(\.\d+)?/)
+      const spans = document.querySelectorAll("#mine .mine-hero div:nth-child(2) > span")
+      if (spans[0]) spans[0].textContent = `年龄：${matched ? matched[0] : ""} 岁`
+    }
+    updateHealthProfileSaveState()
+  }))
 
   profileSaveButton.addEventListener("click", async () => {
+    if (!updateHealthProfileSaveState()) return
     const inputs = Array.from(document.querySelectorAll(".profile-edit-preview input"))
     const numberValue = (text) => Number(String(text).match(/\d+(\.\d+)?/)?.[0] || 0)
+    profileSaveButton.disabled = true
+    profileSaveButton.textContent = "保存中..."
     const response = await apiSend("/me/health-profile", "PUT", {
       gender: inputs[0]?.value || "",
       age: numberValue(inputs[1]?.value),
@@ -1037,9 +1068,23 @@ function bindMineSave() {
     if (apiOk(response)) {
       const spans = document.querySelectorAll("#mine .mine-hero div:nth-child(2) > span")
       if (spans[0]) spans[0].textContent = `年龄：${response.data.age || ""} 岁`
+      const values = [
+        response.data.gender,
+        `${response.data.age || ""} 岁`,
+        `${response.data.height_cm || ""} cm`,
+        `${response.data.weight_kg || ""} kg`,
+        response.data.bmi,
+        response.data.disease_type,
+        response.data.medical_history,
+        response.data.medications || response.data.medication
+      ]
+      inputs.forEach((input, index) => { input.value = values[index] || "" })
+      healthProfileState.saved = values.map((value) => String(value || "").trim())
+      healthProfileState.current = [...healthProfileState.saved]
     }
     setTimeout(() => {
       profileSaveButton.textContent = "保存健康档案"
+      updateHealthProfileSaveState()
     }, 1200)
   })
 }

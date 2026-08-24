@@ -150,12 +150,15 @@
 }
 
 .profile-save-button.inactive,
-.profile-save-button[disabled] {
+.profile-save-button[disabled],
+.health-save-button.inactive,
+.health-save-button[disabled] {
   color: #94a3b8;
   background: #e5e7eb;
 }
 
-.profile-save-button.active {
+.profile-save-button.active,
+.health-save-button.active {
   color: #ffffff;
   background: #0f766e;
   box-shadow: 0 12rpx 26rpx rgba(15, 118, 110, 0.18);

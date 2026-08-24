@@ -49,7 +49,7 @@
         />
       </view>
     </view>
-    <button class="button save-button" bindtap="saveHealthProfile">保存健康档案</button>
+    <button class="button save-button health-save-button {{isHealthProfileDirty ? 'active' : 'inactive'}}" bindtap="saveHealthProfile" loading="{{isSavingHealthProfile}}" disabled="{{!isHealthProfileDirty || isSavingHealthProfile}}">保存健康档案</button>
   </view>
 
   <view class="section">

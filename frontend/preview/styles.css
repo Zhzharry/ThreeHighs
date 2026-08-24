@@ -1621,6 +1621,20 @@ button {
   cursor: pointer;
 }
 
+.profile-save-preview.inactive,
+.profile-save-preview:disabled {
+  color: #94a3b8;
+  background: #e5e7eb;
+  cursor: default;
+}
+
+.profile-save-preview.active {
+  color: #ffffff;
+  background: #0f766e;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
+  cursor: pointer;
+}
+
 .settings-preview {
   overflow: hidden;
   border: 1px solid #eef2f7;
