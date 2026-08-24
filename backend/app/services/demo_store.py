@@ -971,17 +971,21 @@ class DemoStore:
 
     def send_message(self, conversation_id, content, use_daily_context=True, related_date=None, user_id=1):
         from app.repositories import AiRepository
+        from app.services.rag_demo import RagDemoService
+
         user_message = AiRepository.add_message(conversation_id, "user", content, user_id)
         if user_message is None:
             return None
-        answer = self._ai_answer(content, use_daily_context, related_date)
-        assistant_message = AiRepository.add_message(conversation_id, "assistant", answer, user_id)
+        rag_result = RagDemoService.answer(user_id, content)
+        assistant_message = AiRepository.add_message(conversation_id, "assistant", rag_result["content"], user_id)
         return {
             "user_message": user_message,
             "assistant_message": assistant_message,
             "retrieval": {
-                "collection": "health_knowledge",
-                "hit_count": 3,
+                "collection": rag_result["collection"],
+                "mode": rag_result["mode"],
+                "hit_count": len(rag_result["items"]),
+                "items": rag_result["items"],
             },
         }
 

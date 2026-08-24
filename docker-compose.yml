@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-three_high_app}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-app-password}
     ports:
-      - "3307:3306"
+      - "${MYSQL_HOST_PORT:-3308}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -21,7 +21,6 @@ services:
     restart: unless-stopped
 
   frontend-preview:
-    profiles: ["legacy-preview"]
     build:
       context: ./frontend/preview
       dockerfile: Dockerfile
@@ -59,7 +58,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
-      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8088,http://127.0.0.1:8088}
       RATELIMIT_STORAGE_URI: ${RATELIMIT_STORAGE_URI:-redis://redis:6379/0}
       RATELIMIT_DEFAULT: ${RATELIMIT_DEFAULT:-1000 per minute}
       WECHAT_LOGIN_RATE_LIMIT: ${WECHAT_LOGIN_RATE_LIMIT:-120 per minute}
@@ -74,7 +73,7 @@ services:
       PRIVACY_POLICY_VERSION: ${PRIVACY_POLICY_VERSION:-2026-08-23}
       USER_AGREEMENT_VERSION: ${USER_AGREEMENT_VERSION:-2026-08-23}
       HEALTH_DATA_CONSENT_VERSION: ${HEALTH_DATA_CONSENT_VERSION:-2026-08-23}
-      HEALTH_CONSENT_REQUIRED: ${HEALTH_CONSENT_REQUIRED:-true}
+      HEALTH_CONSENT_REQUIRED: ${HEALTH_CONSENT_REQUIRED:-false}
       TRUST_PROXY_COUNT: ${TRUST_PROXY_COUNT:-0}
       DB_POOL_RECYCLE_SECONDS: ${DB_POOL_RECYCLE_SECONDS:-1800}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}

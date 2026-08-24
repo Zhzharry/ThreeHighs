@@ -200,6 +200,20 @@ def create_app(config_class=Config):
         ):
             migration_key = "task-alert-repositories-v1"
             if not store.domain_migrations.get(migration_key):
+                daily_tables_for_tasks = {"daily_records", "vital_records", "meal_records"}
+                meal_columns_for_tasks = (
+                    {column["name"] for column in inspector.get_columns("meal_records")}
+                    if inspector.has_table("meal_records")
+                    else set()
+                )
+                daily_migration_key = "daily-repositories-v1"
+                if (
+                    daily_tables_for_tasks.issubset(set(inspector.get_table_names()))
+                    and "meal_name" in meal_columns_for_tasks
+                    and not store.domain_migrations.get(daily_migration_key)
+                ):
+                    bootstrap_daily_data(store)
+                    store.domain_migrations[daily_migration_key] = True
                 bootstrap_task_alert_data(store)
                 store.domain_migrations[migration_key] = True
             if has_state_table:

@@ -3,4 +3,3 @@
 storage/
 **/__pycache__/
 *.pyc
-tests/

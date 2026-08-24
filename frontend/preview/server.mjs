@@ -25,7 +25,8 @@ createServer((req, res) => {
   }
 
   res.writeHead(200, {
-    "content-type": mimeTypes[extname(filePath)] || "application/octet-stream"
+    "content-type": mimeTypes[extname(filePath)] || "application/octet-stream",
+    "cache-control": "no-store"
   })
   createReadStream(filePath).pipe(res)
 }).listen(80, "0.0.0.0")

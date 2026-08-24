@@ -56,7 +56,7 @@ class Config:
     TRUST_PROXY_COUNT = int(os.getenv("TRUST_PROXY_COUNT", "0"))
     CORS_ORIGINS = _csv_env(
         "CORS_ORIGINS",
-        "",
+        "http://localhost:8088,http://127.0.0.1:8088" if APP_ENV != "production" else "",
     )
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_DEFAULT = os.getenv("RATELIMIT_DEFAULT", "1000 per minute")

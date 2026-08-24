@@ -45,7 +45,7 @@ Page({
       { role: "user", time: "09:20", text: "最近空腹血糖偏高，晚饭应该怎么吃？" },
       { role: "assistant", time: "09:20", text: presetAnswers["晚饭怎么吃"] }
     ],
-    draftText: "输入你的健康问题",
+    draftText: "",
     quickQuestions: ["晚饭怎么吃", "血压偏高怎么办", "报告异常怎么看"],
     chatRecords: [
       { title: "晚饭怎么吃", desc: "根据空腹血糖 6.8 生成晚餐建议", time: "今日 09:20" },
@@ -165,23 +165,31 @@ Page({
   chooseQuestion(event) {
     const question = event.currentTarget.dataset.question
     this.setData({
-      currentQuestion: question
+      currentQuestion: question,
+      draftText: question
     })
     this.sendQuestion(question)
   },
   sendQuestion(question) {
+    const normalizedQuestion = String(question || "").trim()
+    if (!normalizedQuestion) {
+      wx.showToast({ title: "请输入问题", icon: "none" })
+      return
+    }
     const ensureConversation = this.data.currentConversationId
       ? Promise.resolve(this.data.currentConversationId)
       : api.createAiConversation({
-        title: question,
+        title: normalizedQuestion,
         source: "quick_question",
         related_date: todayText()
       }).then((response) => response.data.conversation_id)
 
     this.setData({
       isSending: true,
+      draftText: "",
+      currentQuestion: normalizedQuestion,
       messages: this.data.messages.concat([
-        { role: "user", time: "刚刚", text: question },
+        { role: "user", time: "刚刚", text: normalizedQuestion },
         { role: "assistant", time: "刚刚", text: "正在结合你的每日记录生成建议..." }
       ])
     })
@@ -191,7 +199,7 @@ Page({
         currentConversationId: conversationId
       })
       return api.sendAiMessage(conversationId, {
-        content: question,
+        content: normalizedQuestion,
         use_daily_context: true,
         related_date: todayText()
       })
@@ -222,7 +230,7 @@ Page({
       })
       this.loadConversations()
     }).catch(() => {
-      const fallback = presetAnswers[question] || presetAnswers["晚饭怎么吃"]
+      const fallback = presetAnswers[normalizedQuestion] || "我会结合你的每日记录给出生活方式建议。当前演示接口异常，请稍后重试。"
       const nextMessages = this.data.messages.slice(0, -1).concat([
         { role: "assistant", time: "刚刚", text: fallback }
       ])
@@ -236,8 +244,16 @@ Page({
       })
     })
   },
+  editDraftText(event) {
+    this.setData({ draftText: event.detail.value })
+  },
   sendCurrentQuestion() {
-    this.sendQuestion(this.data.currentQuestion)
+    this.sendQuestion(this.data.draftText)
+  },
+  openConversationFromHistory(event) {
+    const conversationId = Number(event.currentTarget.dataset.id)
+    if (!conversationId) return
+    this.openConversation(conversationId)
   },
   showDemoToast() {
     wx.showToast({

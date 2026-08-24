@@ -1170,8 +1170,10 @@ POST /ai/conversations/{conversation_id}/messages
 说明：
 
 1. `use_daily_context = true` 时，后端会读取当天每日记录、血压血糖、饮食、报告异常。
-2. 后端使用 Prompt 约束 AI 回复，只给生活方式建议和就医提醒，不替代医生诊断。
-3. 检索增强数据来自 Chroma 向量库，例如健康知识、指标参考范围、用户健康记忆。
+2. 当前 demo 未接入真实大模型时，后端使用 `RagDemoService` 从数据库资料中取第一条、最后一条和随机一条，直接拼成助手回复。
+3. 当前 demo 响应的 `retrieval.items` 会返回三条结构化命中结果，字段包含 `position`、`source`、`source_id` 和 `content`。
+4. 正式接入大模型后，后端再使用 Prompt 约束 AI 回复，只给生活方式建议和就医提醒，不替代医生诊断。
+5. 正式检索增强数据来自 Chroma 向量库，例如健康知识、指标参考范围、用户健康记忆。
 
 ### 6.7 删除 AI 会话
 

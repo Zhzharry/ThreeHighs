@@ -232,12 +232,13 @@
   border-top: 1rpx solid #eef2f7;
 }
 
-.fake-chat-input {
+.real-chat-input {
   flex: 1;
   height: 68rpx;
   padding: 0 20rpx;
+  border: 0;
   border-radius: 999rpx;
-  color: #94a3b8;
+  color: #111827;
   background: #f1f5f9;
   font-size: 25rpx;
   line-height: 68rpx;

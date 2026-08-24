@@ -1063,7 +1063,8 @@ Page({
       }
     })
 
-    api.uploadReport(filePath, source === "拍照" ? "camera" : "album", this.data.selectedDate).then((response) => {
+    const uploadSource = reportType === "PDF" ? "pdf" : source === "拍照" ? "camera" : "album"
+    api.uploadReport(filePath, uploadSource, this.data.selectedDate).then((response) => {
       if (response.code !== 0) {
         this.setData({
           "records.selectedReport.status": "上传失败",
@@ -1134,7 +1135,7 @@ Page({
   startOcrDemo() {
     if (!this.data.records.hasReportFile) {
       wx.showToast({
-        title: "请先上传图片",
+        title: "请先上传报告",
         icon: "none"
       })
       return
@@ -1154,28 +1155,28 @@ Page({
       this.ocrTimer = null
     }
 
-      this.setData({
-        "records.isRecognizing": true,
-        "records.ocrProgress": 8,
-        "records.ocrProgressStyle": "width: 8%;",
-        "records.reports": [],
-        "records.selectedReport.status": "识别中",
+    this.setData({
+      "records.isRecognizing": true,
+      "records.ocrProgress": 8,
+      "records.ocrProgressStyle": "width: 8%;",
+      "records.reports": [],
+      "records.selectedReport.status": "识别中",
       "records.selectedReport.confidence": "计算中",
       "records.selectedReport.preview": "正在请求后端 OCR 识别接口"
     })
 
-      api.startReportRecognize(reportId).then((startResponse) => {
-        if (startResponse.code !== 0) throw new Error(startResponse.message || "识别启动失败")
-        this.ocrTimer = setInterval(() => {
+    api.startReportRecognize(reportId).then((startResponse) => {
+      if (startResponse.code !== 0) throw new Error(startResponse.message || "识别启动失败")
+      this.ocrTimer = setInterval(() => {
         api.getReportProgress(reportId).then((response) => {
-          if (response.code !== 0) return
-          const progress = response.data.progress
-          const done = progress >= 100 || response.data.status === "review_pending" || response.data.status === "completed"
+          if (response.code !== 0) throw new Error(response.message || "识别进度查询失败")
+          const progress = Number(response.data.progress || 0)
+          const done = progress >= 100 || ["review_pending", "completed"].includes(response.data.status)
           const nextData = {
             "records.ocrProgress": progress,
-            "records.ocrProgressStyle": `width: ${Math.max(0, Math.min(Number(progress) || 0, 100))}%;`,
+            "records.ocrProgressStyle": `width: ${Math.max(0, Math.min(progress, 100))}%;`,
             "records.selectedReport.status": done ? "识别完成" : "识别中",
-            "records.selectedReport.preview": response.data.message
+            "records.selectedReport.preview": response.data.message || "正在提取报告指标"
           }
 
           if (done) {
@@ -1188,15 +1189,27 @@ Page({
             wx.showToast({
               title: "OCR 识别完成",
               icon: "success"
-      }).catch((error) => {
-        this.setData({ "records.isRecognizing": false })
-        wx.showToast({ title: error.message || "识别启动失败", icon: "none" })
-      })
+            })
           }
 
           this.setData(nextData)
+        }).catch((error) => {
+          clearInterval(this.ocrTimer)
+          this.ocrTimer = null
+          this.setData({
+            "records.isRecognizing": false,
+            "records.selectedReport.status": "识别失败",
+            "records.selectedReport.preview": error.message || "识别进度查询失败"
+          })
         })
       }, 800)
+    }).catch((error) => {
+      this.setData({
+        "records.isRecognizing": false,
+        "records.selectedReport.status": "识别失败",
+        "records.selectedReport.preview": error.message || "识别启动失败"
+      })
+      wx.showToast({ title: error.message || "识别启动失败", icon: "none" })
     })
   },
   onUnload() {

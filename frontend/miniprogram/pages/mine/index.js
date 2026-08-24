@@ -1,4 +1,5 @@
 const api = require("../../services/api")
+const WECHAT_PROFILE_PROMPT_KEY = "mine_wechat_profile_prompted"
 
 function avatarText(name) {
   return (name || "用").slice(0, 1)
@@ -7,6 +8,28 @@ function avatarText(name) {
 function maskPhone(phone) {
   const value = String(phone || "")
   return value.length === 11 ? `${value.slice(0, 3)}****${value.slice(-4)}` : value || "未填写"
+}
+
+function profileFormFromUser(user = {}) {
+  return {
+    nickname: user.nickname || "",
+    phone: user.phone || "",
+    avatarUrl: user.avatar_url || "",
+    avatarLocalPath: "",
+    avatarRemoved: false
+  }
+}
+
+function comparableProfileForm(form = {}) {
+  return {
+    nickname: String(form.nickname || "").trim(),
+    phone: String(form.phone || "").trim(),
+    avatarUrl: String(form.avatarUrl || "").trim()
+  }
+}
+
+function comparableHealthProfileItems(items = []) {
+  return items.map((item) => String(item.value || "").trim())
 }
 
 function formatProfileItems(profile = {}) {
@@ -37,7 +60,19 @@ Page({
       age: 56,
       phone: "138****0926"
     },
-    profileForm: { nickname: "李明", phone: "13800000926" },
+    profileForm: {
+      nickname: "李明",
+      phone: "13800000926",
+      avatarUrl: "",
+      avatarLocalPath: "",
+      avatarRemoved: false
+    },
+    savedProfileForm: {
+      nickname: "李明",
+      phone: "13800000926",
+      avatarUrl: ""
+    },
+    isProfileDirty: false,
     isSavingProfile: false,
     isUploadingAvatar: false,
     profileItems: [
@@ -50,6 +85,9 @@ Page({
       { label: "既往病史", value: "轻度脂肪肝" },
       { label: "用药", value: "二甲双胍、氨氯地平" }
     ],
+    savedHealthProfileItems: ["男", "56 岁", "172 cm", "74 kg", "25.1", "高血压 + 高血糖", "轻度脂肪肝", "二甲双胍、氨氯地平"],
+    isHealthProfileDirty: false,
+    isSavingHealthProfile: false,
     settings: [
       { label: "异常预警推送", value: "已开启" },
       { label: "每日记录提醒", value: "20:30" }
@@ -64,24 +102,32 @@ Page({
   },
   onLoad() {
     this.loadMineData()
+    setTimeout(() => this.promptWechatProfileIfNeeded(), 600)
   },
   loadMineData() {
     api.getMineProfile().then((response) => {
       if (response.code !== 0) return
       const user = response.data.user
       const profile = response.data.health_profile
+      const profileForm = profileFormFromUser(user)
+      const savedProfileForm = comparableProfileForm(profileForm)
+      const profileItems = formatProfileItems(profile)
 
       this.setData({
         isBackendConnected: true,
         user: {
           avatar: avatarText(user.nickname),
-          avatarUrl: user.avatar_url || "",
+          avatarUrl: profileForm.avatarUrl,
           name: user.nickname,
-          age: user.age,
-          phone: user.phone_masked || maskPhone(user.phone)
+          age: profile.age || user.age || "",
+          phone: user.phone_masked || maskPhone(profileForm.phone)
         },
-        profileForm: { nickname: user.nickname, phone: user.phone || "" },
-        profileItems: formatProfileItems(profile)
+        profileForm,
+        savedProfileForm,
+        isProfileDirty: false,
+        profileItems,
+        savedHealthProfileItems: comparableHealthProfileItems(profileItems),
+        isHealthProfileDirty: false
       })
     }).catch(() => {
       wx.showToast({
@@ -103,6 +149,67 @@ Page({
 
     api.getConsents().then((response) => {
       if (response.code === 0) this.setData({ consentStatus: response.data })
+    })
+  },
+  hasProfileChanged(profileForm = this.data.profileForm) {
+    const current = comparableProfileForm(profileForm)
+    const saved = comparableProfileForm(this.data.savedProfileForm)
+    return current.nickname !== saved.nickname
+      || current.phone !== saved.phone
+      || current.avatarUrl !== saved.avatarUrl
+  },
+  hasHealthProfileChanged(profileItems = this.data.profileItems) {
+    const current = comparableHealthProfileItems(profileItems)
+    const saved = this.data.savedHealthProfileItems || []
+    return current.length !== saved.length || current.some((value, index) => value !== saved[index])
+  },
+  applyProfileForm(profileForm) {
+    const nickname = profileForm.nickname || "未填写"
+    this.setData({
+      profileForm,
+      "user.avatar": avatarText(nickname),
+      "user.avatarUrl": profileForm.avatarUrl || "",
+      "user.name": nickname,
+      "user.phone": maskPhone(profileForm.phone),
+      isProfileDirty: this.hasProfileChanged(profileForm)
+    })
+  },
+  promptWechatProfileIfNeeded() {
+    if (wx.getStorageSync(WECHAT_PROFILE_PROMPT_KEY)) return
+    wx.setStorageSync(WECHAT_PROFILE_PROMPT_KEY, true)
+    wx.showModal({
+      title: "完善个人资料",
+      content: "是否使用微信头像和微信昵称作为个人资料？也可以稍后手动编辑。",
+      confirmText: "使用",
+      cancelText: "暂不",
+      success: ({ confirm }) => {
+        if (confirm) this.useWechatProfile()
+      }
+    })
+  },
+  useWechatProfile() {
+    if (!wx.getUserProfile) {
+      wx.showToast({ title: "当前基础库不支持自动获取，可手动选择头像和昵称", icon: "none" })
+      return
+    }
+    wx.getUserProfile({
+      desc: "用于完善三高健康管理个人资料",
+      success: ({ userInfo }) => {
+        const nickname = String(userInfo.nickName || "").trim()
+        const avatarUrl = userInfo.avatarUrl || ""
+        const profileForm = {
+          ...this.data.profileForm,
+          nickname: nickname || this.data.profileForm.nickname,
+          avatarUrl: avatarUrl || this.data.profileForm.avatarUrl,
+          avatarLocalPath: "",
+          avatarRemoved: false
+        }
+        this.applyProfileForm(profileForm)
+        wx.showToast({ title: "已填入微信资料，请保存", icon: "none" })
+      },
+      fail: () => {
+        wx.showToast({ title: "未使用微信资料，可直接手动编辑", icon: "none" })
+      }
     })
   },
   saveSettings(nextValues) {
@@ -132,10 +239,23 @@ Page({
   },
   editUserField(event) {
     const field = event.currentTarget.dataset.field
-    this.setData({ [`profileForm.${field}`]: event.detail.value })
+    this.applyProfileForm({
+      ...this.data.profileForm,
+      [field]: event.detail.value
+    })
   },
   saveUserProfile() {
-    if (this.data.isSavingProfile) return
+    if (this.data.isSavingProfile || this.data.isUploadingAvatar || !this.data.isProfileDirty) return
+    wx.showModal({
+      title: "保存个人资料",
+      content: "确认保存当前头像、昵称和联系方式的修改吗？",
+      confirmText: "保存",
+      success: ({ confirm }) => {
+        if (confirm) this.commitUserProfile()
+      }
+    })
+  },
+  commitUserProfile() {
     const nickname = this.data.profileForm.nickname.trim()
     const phone = this.data.profileForm.phone.trim()
     if (!nickname || nickname.length > 30) {
@@ -146,52 +266,78 @@ Page({
       wx.showToast({ title: "请输入正确的手机号", icon: "none" })
       return
     }
-    this.setData({ isSavingProfile: true })
-    api.updateMineProfile({ nickname, phone }).then((response) => {
+    const form = this.data.profileForm
+    let avatarUrl = form.avatarUrl || ""
+    let avatarTask = Promise.resolve()
+    this.setData({ isSavingProfile: true, isUploadingAvatar: !!form.avatarLocalPath || !!form.avatarRemoved })
+
+    if (form.avatarRemoved) {
+      avatarTask = api.deleteMineAvatar().then((response) => {
+        if (response.code !== 0) throw new Error(response.message)
+        avatarUrl = ""
+      })
+    } else if (form.avatarLocalPath) {
+      avatarTask = api.uploadMineAvatar(form.avatarLocalPath).then((response) => {
+        if (response.code !== 0) throw new Error(response.message)
+        avatarUrl = response.data.avatar_url || avatarUrl
+      })
+    }
+
+    avatarTask.then(() => api.updateMineProfile({ nickname, phone, avatar_url: avatarUrl })).then((response) => {
       if (response.code !== 0) throw new Error(response.message)
+      const savedProfileForm = {
+        nickname: response.data.nickname,
+        phone,
+        avatarUrl: response.data.avatar_url || avatarUrl || ""
+      }
       this.setData({
-        "user.avatar": avatarText(response.data.nickname),
-        "user.name": response.data.nickname,
-        "user.phone": response.data.phone,
-        profileForm: { nickname: response.data.nickname, phone }
+        user: {
+          ...this.data.user,
+          avatar: avatarText(savedProfileForm.nickname),
+          avatarUrl: savedProfileForm.avatarUrl,
+          name: savedProfileForm.nickname,
+          phone: response.data.phone || maskPhone(savedProfileForm.phone)
+        },
+        profileForm: {
+          ...savedProfileForm,
+          avatarLocalPath: "",
+          avatarRemoved: false
+        },
+        savedProfileForm,
+        isProfileDirty: false
       })
       wx.showToast({ title: "个人资料已保存", icon: "success" })
     }).catch((error) => wx.showToast({ title: error.message || "保存失败", icon: "none" }))
-      .finally(() => this.setData({ isSavingProfile: false }))
+      .finally(() => this.setData({ isSavingProfile: false, isUploadingAvatar: false }))
   },
   chooseAvatar(event) {
     const filePath = event.detail.avatarUrl
-    if (!filePath || this.data.isUploadingAvatar) return
-    this.setData({ isUploadingAvatar: true, "user.avatarUrl": filePath })
-    api.uploadMineAvatar(filePath).then((response) => {
-      if (response.code !== 0) throw new Error(response.message)
-      this.setData({ "user.avatarUrl": response.data.avatar_url })
-      wx.showToast({ title: "头像已更新", icon: "success" })
-    }).catch((error) => {
-      this.setData({ "user.avatarUrl": "" })
-      wx.showToast({ title: error.message || "头像上传失败", icon: "none" })
-    }).finally(() => this.setData({ isUploadingAvatar: false }))
-  },
-  removeAvatar() {
-    if (!this.data.user.avatarUrl || this.data.isUploadingAvatar) return
-    wx.showModal({ title: "移除头像", content: "移除后将显示昵称首字，是否继续？", success: ({ confirm }) => {
-      if (!confirm) return
-      this.setData({ isUploadingAvatar: true })
-      api.deleteMineAvatar().then((response) => {
-        if (response.code !== 0) throw new Error(response.message)
-        this.setData({ "user.avatarUrl": "" })
-        wx.showToast({ title: "头像已移除", icon: "success" })
-      }).catch((error) => wx.showToast({ title: error.message || "移除失败", icon: "none" }))
-        .finally(() => this.setData({ isUploadingAvatar: false }))
-    } })
+    if (!filePath || this.data.isSavingProfile || this.data.isUploadingAvatar) return
+    this.applyProfileForm({
+      ...this.data.profileForm,
+      avatarUrl: filePath,
+      avatarLocalPath: filePath,
+      avatarRemoved: false
+    })
+    wx.showToast({ title: "已选择头像，请保存", icon: "none" })
   },
   editProfileItem(event) {
     const index = Number(event.currentTarget.dataset.index)
-    this.setData({
-      [`profileItems[${index}].value`]: event.detail.value
-    })
+    const value = event.detail.value
+    const profileItems = this.data.profileItems.map((item, itemIndex) => (
+      itemIndex === index ? { ...item, value } : item
+    ))
+    const nextData = {
+      profileItems,
+      isHealthProfileDirty: this.hasHealthProfileChanged(profileItems)
+    }
+    if (index === 1) {
+      nextData["user.age"] = numberValue(value) || ""
+    }
+    this.setData(nextData)
   },
   saveHealthProfile() {
+    if (this.data.isSavingHealthProfile || !this.data.isHealthProfileDirty) return
     const items = this.data.profileItems
     const payload = {
       gender: items[0].value,
@@ -204,6 +350,7 @@ Page({
       chronic_types: ["hypertension", "diabetes"]
     }
 
+    this.setData({ isSavingHealthProfile: true })
     api.updateHealthProfile(payload).then((response) => {
       if (response.code !== 0) {
         wx.showToast({
@@ -212,9 +359,13 @@ Page({
         })
         return
       }
+      const profileItems = formatProfileItems(response.data)
 
       this.setData({
-        profileItems: formatProfileItems(response.data),
+        profileItems,
+        savedHealthProfileItems: comparableHealthProfileItems(profileItems),
+        isHealthProfileDirty: false,
+        "user.age": response.data.age || "",
         isBackendConnected: true
       })
       wx.showToast({
@@ -226,7 +377,7 @@ Page({
         title: "后端未连接",
         icon: "none"
       })
-    })
+    }).finally(() => this.setData({ isSavingHealthProfile: false }))
   },
   openLegalDocument(event) {
     wx.navigateTo({ url: `/pages/legal/index?type=${event.currentTarget.dataset.type}` })
