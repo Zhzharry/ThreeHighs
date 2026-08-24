@@ -205,28 +205,6 @@
   font-size: 27rpx;
 }
 
-.account-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16rpx;
-  margin-top: 18rpx;
-}
-
-.account-actions .button {
-  margin: 0;
-  font-size: 24rpx;
-}
-
-.secondary-button {
-  color: #0f766e;
-  background: #e0f2f1;
-}
-
-.ghost-danger {
-  color: #b91c1c;
-  background: #fee2e2;
-}
-
 .permission-note {
   display: block;
   margin-top: 18rpx;

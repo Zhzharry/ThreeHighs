@@ -111,7 +111,7 @@ Page({
           avatar: avatarText(user.nickname),
           avatarUrl: profileForm.avatarUrl,
           name: user.nickname,
-          age: user.age,
+          age: profile.age || user.age || "",
           phone: user.phone_masked || maskPhone(profileForm.phone)
         },
         profileForm,
@@ -306,24 +306,15 @@ Page({
     })
     wx.showToast({ title: "已选择头像，请保存", icon: "none" })
   },
-  removeAvatar() {
-    if (!this.data.user.avatarUrl || this.data.isSavingProfile || this.data.isUploadingAvatar) return
-    wx.showModal({ title: "移除头像", content: "移除后将显示昵称首字，是否继续？", success: ({ confirm }) => {
-      if (!confirm) return
-      this.applyProfileForm({
-        ...this.data.profileForm,
-        avatarUrl: "",
-        avatarLocalPath: "",
-        avatarRemoved: true
-      })
-      wx.showToast({ title: "已移除头像，请保存", icon: "none" })
-    } })
-  },
   editProfileItem(event) {
     const index = Number(event.currentTarget.dataset.index)
+    const value = event.detail.value
     this.setData({
-      [`profileItems[${index}].value`]: event.detail.value
+      [`profileItems[${index}].value`]: value
     })
+    if (index === 1) {
+      this.setData({ "user.age": numberValue(value) || "" })
+    }
   },
   saveHealthProfile() {
     const items = this.data.profileItems
@@ -349,6 +340,7 @@ Page({
 
       this.setData({
         profileItems: formatProfileItems(response.data),
+        "user.age": response.data.age || "",
         isBackendConnected: true
       })
       wx.showToast({

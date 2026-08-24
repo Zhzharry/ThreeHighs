@@ -965,14 +965,11 @@ async function loadMine() {
       accountProfileState.avatarRemoved = false
       const hero = document.querySelector("#mine .mine-hero")
       if (hero) {
-        const avatar = hero.querySelector(".avatar")
         const name = hero.querySelector("h1")
         const spans = hero.querySelectorAll("div:nth-child(2) > span")
-        if (avatar) avatar.innerHTML = user.avatar_url
-          ? `<img src="${escapeHtml(user.avatar_url)}" alt="用户头像" />`
-          : `<span>${escapeHtml(user.nickname.slice(0, 1))}</span>`
+        renderWebAvatar(user.avatar_url, user.nickname)
         if (name) name.textContent = user.nickname
-        if (spans[0]) spans[0].textContent = `年龄：${user.age} 岁`
+        if (spans[0]) spans[0].textContent = `年龄：${health.age || user.age || ""} 岁`
         if (spans[1]) spans[1].textContent = `电话：${user.phone_masked || maskPhone(user.phone)}`
       }
 
@@ -1015,6 +1012,12 @@ async function loadMine() {
 
 function bindMineSave() {
   if (!profileSaveButton) return
+  const profileInputs = Array.from(document.querySelectorAll(".profile-edit-preview input"))
+  profileInputs[1]?.addEventListener("input", () => {
+    const matched = String(profileInputs[1].value || "").match(/\d+(\.\d+)?/)
+    const spans = document.querySelectorAll("#mine .mine-hero div:nth-child(2) > span")
+    if (spans[0]) spans[0].textContent = `年龄：${matched ? matched[0] : ""} 岁`
+  })
 
   profileSaveButton.addEventListener("click", async () => {
     const inputs = Array.from(document.querySelectorAll(".profile-edit-preview input"))
@@ -1031,6 +1034,10 @@ function bindMineSave() {
     })
 
     profileSaveButton.textContent = apiOk(response) ? "已保存到后端" : "保存失败"
+    if (apiOk(response)) {
+      const spans = document.querySelectorAll("#mine .mine-hero div:nth-child(2) > span")
+      if (spans[0]) spans[0].textContent = `年龄：${response.data.age || ""} 岁`
+    }
     setTimeout(() => {
       profileSaveButton.textContent = "保存健康档案"
     }, 1200)
@@ -1039,8 +1046,9 @@ function bindMineSave() {
 
 function renderWebAvatar(avatarUrl, nickname) {
   const avatar = document.querySelector("#mine .mine-hero .avatar")
-  if (!avatar) return
-  avatar.innerHTML = avatarUrl
+  const face = avatar?.querySelector(".avatar-face") || avatar
+  if (!face) return
+  face.innerHTML = avatarUrl
     ? `<img src="${escapeHtml(avatarUrl)}" alt="用户头像" />`
     : `<span>${escapeHtml((nickname || "用").slice(0, 1))}</span>`
 }
@@ -1083,8 +1091,7 @@ function bindAccountProfile() {
   const nicknameInput = document.querySelector('[data-profile="nickname"]')
   const phoneInput = document.querySelector('[data-profile="phone"]')
   const saveButton = document.querySelector(".account-save-preview")
-  const fileInput = document.querySelector(".avatar-upload-preview input")
-  const removeButton = document.querySelector(".avatar-remove-preview")
+  const fileInput = document.querySelector(".avatar-picker-preview input")
 
   nicknameInput?.addEventListener("input", () => {
     setAccountCurrent({ nickname: nicknameInput.value.trim() })
@@ -1158,13 +1165,6 @@ function bindAccountProfile() {
     fileInput.value = ""
   })
 
-  removeButton?.addEventListener("click", () => {
-    if (!window.confirm("确定移除当前头像吗？")) return
-    accountProfileState.avatarFile = null
-    accountProfileState.avatarRemoved = true
-    setAccountCurrent({ avatarUrl: "" })
-    window.alert("已移除头像，点击保存后才会同步。")
-  })
 }
 
 function bindMineSettings() {

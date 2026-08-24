@@ -345,7 +345,10 @@
 
           <article class="page" id="mine">
             <section class="mine-hero">
-              <div class="avatar"><span>李</span></div>
+              <label class="avatar avatar-picker-preview">
+                <span class="avatar-face"><span>李</span></span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" />
+              </label>
               <div>
                 <h1>李明</h1>
                 <span>年龄：56 岁</span>
@@ -360,10 +363,6 @@
               <div class="account-edit-preview">
                 <label><span>昵称</span><input data-profile="nickname" maxlength="30" value="李明" /></label>
                 <label><span>手机号</span><input data-profile="phone" maxlength="11" inputmode="numeric" value="13800000926" /></label>
-              </div>
-              <div class="avatar-actions-preview">
-                <label class="avatar-upload-preview">选择头像<input type="file" accept="image/jpeg,image/png,image/webp" /></label>
-                <button class="avatar-remove-preview" type="button">移除头像</button>
               </div>
               <button class="account-save-preview inactive" type="button" disabled>保存个人资料</button>
               <p class="account-pending-preview" hidden>资料已修改，保存后才会同步到后端。</p>
